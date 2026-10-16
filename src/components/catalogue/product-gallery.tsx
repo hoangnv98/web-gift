@@ -1,0 +1,44 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { unsplash, img, type ImageKey } from "@/lib/images";
+
+export function ProductGallery({ images, alt }: { images: ImageKey[]; alt: string }) {
+  const [active, setActive] = useState(0);
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row-reverse">
+      <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-3xl bg-cream-100 ring-1 ring-ink-900/5">
+        {images.map((key, i) => (
+          <Image
+            key={key + i}
+            src={unsplash(img[key], 1200, 1500)}
+            alt={i === 0 ? alt : `${alt} – ảnh ${i + 1}`}
+            fill
+            priority={i === 0}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className={cn("object-cover transition-opacity duration-500", i === active ? "opacity-100" : "opacity-0")}
+          />
+        ))}
+      </div>
+      <div className="flex gap-3 sm:flex-col">
+        {images.map((key, i) => (
+          <button
+            key={key + i}
+            type="button"
+            onClick={() => setActive(i)}
+            aria-label={`Xem ảnh ${i + 1}`}
+            className={cn(
+              "relative size-20 shrink-0 overflow-hidden rounded-2xl ring-2 transition-all duration-300",
+              i === active ? "ring-gold-500 shadow-glow-gold" : "ring-transparent opacity-70 hover:opacity-100",
+            )}
+          >
+            <Image src={unsplash(img[key], 240, 240)} alt="" fill sizes="80px" className="object-cover" />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

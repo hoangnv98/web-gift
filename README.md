@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lộc Xuân – Catalogue quà Tết
 
-## Getting Started
+Website catalogue quà Tết doanh nghiệp (hộp quà, giỏ quà), lấy cảm hứng từ các trang catalogue quà Tết hiện có. Giai đoạn 1: giao diện tĩnh, dữ liệu mẫu, ảnh chất lượng cao.
 
-First, run the development server:
+## Tech stack
+
+| Lớp | Lựa chọn | Lý do |
+| --- | --- | --- |
+| Framework | **Next.js 16** (App Router, Cache Components, Turbopack) | SEO tốt cho trang catalogue, prerender tĩnh, dễ thêm API route / server action sau này |
+| Ngôn ngữ | **TypeScript** | Kiểu dữ liệu `Product`, `Category` dùng chung giữa UI và backend tương lai |
+| Styling | **Tailwind CSS v4** + design tokens trong `src/app/globals.css` | Token hoá màu / font / shadow, đổi theme theo mùa chỉ cần sửa một file |
+| Icon | `lucide-react` | Nhẹ, tree-shake |
+| Ảnh | `next/image` + Unsplash (tạm) | Tự tối ưu kích thước, lazy-load; sau này thay bằng CDN/CMS riêng |
+| Font | `next/font` – Playfair Display (display) + Be Vietnam Pro (body), subset `vietnamese` | Tự host, không layout shift |
+| Package manager | pnpm | |
+
+## Chạy dự án
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev        # http://localhost:3000
+pnpm build && pnpm start
+pnpm lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cấu trúc
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├─ app/
+│  ├─ layout.tsx              # Header + Footer + fonts + metadata
+│  ├─ page.tsx                # Trang chủ (hero, danh mục, nổi bật, vì sao, quy trình, CTA)
+│  ├─ catalogue/page.tsx      # Catalogue + bộ lọc (chất liệu, khoảng giá, sắp xếp)
+│  ├─ catalogue/[slug]/page.tsx  # Chi tiết sản phẩm (prerender tĩnh)
+│  ├─ lien-he/page.tsx        # Form báo giá (UI only)
+│  └─ globals.css             # Design tokens
+├─ components/
+│  ├─ ui/                     # Button, Badge, Container, SectionHeading, Logo
+│  ├─ layout/                 # Header (sticky, mobile menu), Footer
+│  ├─ catalogue/              # ProductCard, CatalogueView (client), ProductGallery
+│  └─ home/                   # Hero + các section trang chủ
+├─ data/
+│  ├─ site.ts                 # Tên thương hiệu, hotline, nav
+│  └─ catalogue.ts            # Taxonomy + 14 sản phẩm mẫu
+└─ lib/
+   ├─ images.ts               # Registry ảnh (đổi nguồn ảnh tại đây)
+   └─ utils.ts                # cn(), formatPrice(), discountPercent()
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Design system
 
-## Learn More
+- **Màu:** `crimson` (đỏ may mắn, màu chủ đạo), `gold` (vàng kim, nhấn), `cream` (nền giấy), `ink` (chữ). Dùng dạng `bg-crimson-700`, `text-gold-600`, `bg-cream-100`…
+- **Font:** `font-display` cho tiêu đề (serif), `font-sans` cho nội dung.
+- **Hiệu ứng:** `shadow-card`, `shadow-card-hover`, `ease-out-expo`, `.text-gold-foil`, `.bg-tet-lattice`, `.bg-crimson-silk`, `.animate-fade-up`.
+- **Bo góc:** card `rounded-3xl`, nút `rounded-full`.
 
-To learn more about Next.js, take a look at the following resources:
+Đổi tên thương hiệu, hotline, mùa Tết trong `src/data/site.ts`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Lộ trình mở rộng
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **CMS cho sản phẩm** – Sanity hoặc Payload CMS. Chỉ cần thay `src/data/catalogue.ts` bằng hàm fetch; mọi component nhận `Product` nên không đổi. Dùng `"use cache"` + `cacheTag` để revalidate khi CMS cập nhật.
+2. **Ảnh thật** – upload lên Cloudinary / Vercel Blob / S3, thay `unsplash()` trong `src/lib/images.ts`, thêm host vào `images.remotePatterns`.
+3. **Form báo giá** – Server Action trong `lien-he/page.tsx` gửi email (Resend) hoặc đẩy vào CRM / Google Sheet; thêm Zod để validate.
+4. **Giỏ hàng / đặt hàng** – state bằng Zustand, lưu đơn qua Prisma + PostgreSQL (Neon / Supabase), hoặc tích hợp Shopify Storefront API nếu muốn thanh toán.
+5. **Tìm kiếm & phân trang** – khi vượt ~100 sản phẩm: chuyển lọc từ client sang `searchParams` trên server, hoặc dùng Algolia / Meilisearch.
+6. **Đa ngôn ngữ** – `next-intl`, tách chuỗi trong `data/` ra file dịch.
+7. **Analytics / SEO** – `sitemap.ts`, `robots.ts`, JSON-LD `Product`, GA4 / Meta Pixel.
+8. **Admin** – trang `/admin` bảo vệ bằng Auth.js (nếu không dùng CMS có sẵn giao diện).

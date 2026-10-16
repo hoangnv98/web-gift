@@ -1,26 +1,124 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   Design tokens — "Lộc Xuân" Tết gift catalogue
+   Palette: crimson (đỏ may mắn) · gold (vàng kim) · cream (giấy dó) · ink
+--------------------------------------------------------------------------- */
+@theme {
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+
+  --color-crimson-50: #fcf0ef;
+  --color-crimson-100: #f7d9d7;
+  --color-crimson-200: #efb3b0;
+  --color-crimson-400: #c73a36;
+  --color-crimson-500: #b32824;
+  --color-crimson-600: #9c1f1c;
+  --color-crimson-700: #881917;
+  --color-crimson-800: #6c1211;
+  --color-crimson-900: #4d0c0b;
+
+  --color-gold-50: #fdf9ec;
+  --color-gold-100: #f8efcf;
+  --color-gold-200: #f0dfa0;
+  --color-gold-300: #e5cb6e;
+  --color-gold-400: #d8b54a;
+  --color-gold-500: #c9a227;
+  --color-gold-600: #a8841c;
+  --color-gold-700: #866819;
+  --color-gold-800: #5e4a13;
+
+  --color-cream-50: #fcfaf5;
+  --color-cream-100: #f8f2e6;
+  --color-cream-200: #f0e6d2;
+  --color-cream-300: #e4d5b9;
+  --color-cream-400: #d2bd97;
+
+  --color-ink-950: #140e0d;
+  --color-ink-900: #1c1412;
+  --color-ink-800: #2b201d;
+  --color-ink-700: #3d302b;
+  --color-ink-500: #6b5b55;
+  --color-ink-400: #8b7b74;
+  --color-ink-300: #ab9d96;
+  --color-ink-200: #d3cac5;
+
+  --shadow-card: 0 1px 2px rgb(28 20 18 / 0.04), 0 10px 30px -12px rgb(28 20 18 / 0.14);
+  --shadow-card-hover: 0 2px 4px rgb(28 20 18 / 0.05), 0 24px 48px -16px rgb(136 25 23 / 0.28);
+  --shadow-glow-gold: 0 0 0 1px rgb(201 162 39 / 0.35), 0 12px 32px -12px rgb(201 162 39 / 0.45);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-cream-50);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--color-gold-200);
+    color: var(--color-ink-900);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+
+  /* Gold foil text */
+  .text-gold-foil {
+    background: linear-gradient(110deg, #866819 0%, #c9a227 30%, #f0dfa0 50%, #c9a227 70%, #866819 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Subtle lattice pattern used on hero / section backgrounds */
+  .bg-tet-lattice {
+    background-color: var(--color-cream-100);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 2 46 24 24 46 2 24Z' fill='none' stroke='%23c9a227' stroke-opacity='0.16' stroke-width='1'/%3E%3Ccircle cx='24' cy='24' r='1.6' fill='%23c9a227' fill-opacity='0.22'/%3E%3C/svg%3E");
+  }
+  .bg-crimson-silk {
+    background-color: var(--color-crimson-800);
+    background-image:
+      radial-gradient(1200px 500px at 10% -10%, rgb(201 162 39 / 0.18), transparent 60%),
+      radial-gradient(800px 400px at 100% 110%, rgb(255 255 255 / 0.08), transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cpath d='M28 4 52 28 28 52 4 28Z' fill='none' stroke='%23ffffff' stroke-opacity='0.07' stroke-width='1'/%3E%3C/svg%3E");
+  }
+
+  .ring-gold-inset {
+    box-shadow: inset 0 0 0 1px rgb(201 162 39 / 0.45);
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.8s var(--ease-out-expo) both;
+  }
+  .animate-delay-1 { animation-delay: 0.1s; }
+  .animate-delay-2 { animation-delay: 0.2s; }
+  .animate-delay-3 { animation-delay: 0.3s; }
+  .animate-delay-4 { animation-delay: 0.4s; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up { animation: none; }
+  html { scroll-behavior: auto; }
 }
