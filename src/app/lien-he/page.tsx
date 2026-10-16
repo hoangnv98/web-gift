@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Mail, MapPin, Phone, Clock, MessageCircle, Building2 } from "lucide-react";
-import { site } from "@/data/site";
+import { getB2B, getSettings } from "@/lib/cms";
 import { Container } from "@/components/ui/container";
 import { QuoteForm } from "@/components/b2b/quote-form";
 import { PageHero } from "@/components/ui/page-hero";
 
 export const metadata: Metadata = { title: "Liên hệ & báo giá", description: "Liên hệ T&Q GIFT để nhận báo giá quà tặng doanh nghiệp. Phản hồi trong 24 giờ.", alternates: { canonical: "/lien-he" } };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const [site, b2b] = await Promise.all([getSettings(), getB2B()]);
   return (
     <>
       <PageHero eyebrow="Liên hệ" title="Nhận tư vấn &" highlight="báo giá doanh nghiệp" text="Để lại thông tin, đội ngũ tư vấn sẽ phản hồi trong 24 giờ làm việc." image="handingGift" />
@@ -16,13 +18,13 @@ export default function ContactPage() {
           <ul className="space-y-5 text-sm">
             <Info icon={Building2} label="Đơn vị" value={site.company.legalName} />
             <Info icon={Phone} label="Hotline" value={site.hotline} href={site.hotlineHref} />
-            <Info icon={MessageCircle} label="Zalo" value="Chat với tư vấn viên" href={site.zalo} />
-            <Info icon={Mail} label="Email" value={site.email} href={`mailto:${site.email}`} />
+            {site.zalo && <Info icon={MessageCircle} label="Zalo" value="Chat với tư vấn viên" href={site.zalo} />}
+            {site.email && <Info icon={Mail} label="Email" value={site.email} href={`mailto:${site.email}`} />}
             <Info icon={MapPin} label="Địa chỉ" value={site.company.address} />
-            <Info icon={Clock} label="Giờ làm việc" value={site.hours} />
+            {site.hours && <Info icon={Clock} label="Giờ làm việc" value={site.hours} />}
           </ul>
         </div>
-        <div className="lg:col-span-7"><QuoteForm /></div>
+        <div className="lg:col-span-7"><Suspense><QuoteForm note={b2b.quoteNote} /></Suspense></div>
       </Container>
     </>
   );

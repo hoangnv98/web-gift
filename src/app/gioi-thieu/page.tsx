@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import { AboutBlock, CoreValues, BrandStory } from "@/components/home/sections";
 import { PageHero } from "@/components/ui/page-hero";
-import { site } from "@/data/site";
+import { getSettings } from "@/lib/cms";
 
-export const metadata: Metadata = { title: "Giới thiệu T&Q GIFT", description: site.description, alternates: { canonical: "/gioi-thieu" } };
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSettings();
+  return { title: `Giới thiệu ${site.name}`, description: site.description, alternates: { canonical: "/gioi-thieu" } };
+}
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const site = await getSettings();
   return (
     <>
-      <PageHero eyebrow="Về chúng tôi" title={site.name} highlight={site.slogan} text="Thương hiệu quà tặng cao cấp thuộc Công ty TNHH T&Q Gift Việt Nam." image="darkLuxuryGifts" />
+      <PageHero eyebrow="Về chúng tôi" title={site.name} highlight={site.slogan} text={`Thương hiệu quà tặng cao cấp thuộc ${site.company.legalName}.`} image="darkLuxuryGifts" />
       <AboutBlock />
       <CoreValues />
       <BrandStory />

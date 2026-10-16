@@ -1,12 +1,30 @@
-import { Button } from "@/components/ui/button";
+"use client";
 
-/**
- * Form báo giá sỉ – hiện là UI tĩnh.
- * Giai đoạn 2: chuyển thành Server Action gửi thông báo Zalo OA / Email (Resend) / Telegram Bot cho Admin.
- */
-export function QuoteForm({ compact = false }: { compact?: boolean }) {
+import { useActionState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { submitQuote, type QuoteState } from "@/app/actions/quote";
+
+/** Form báo giá sỉ – gửi qua Server Action sang tqgift-admin (quote-requests), admin nhận email/Telegram. */
+export function QuoteForm({ compact = false, note }: { compact?: boolean; note?: string }) {
+  const [state, action, pending] = useActionState<QuoteState | null, FormData>(submitQuote, null);
+  const pathname = usePathname();
+  const sp = useSearchParams();
+  const preset = sp.get("san-pham");
+
+  if (state?.ok) {
+    return (
+      <div id="bao-gia" className="scroll-mt-32 rounded-3xl bg-white p-8 text-center shadow-card ring-1 ring-navy-900/5">
+        <CheckCircle2 className="mx-auto size-12 text-gold-600" />
+        <h3 className="mt-4 text-2xl font-semibold text-navy-900">Đã nhận yêu cầu báo giá</h3>
+        <p className="mt-2 text-sm text-ink-500">{state.message}</p>
+      </div>
+    );
+  }
+
   return (
-    <form id="bao-gia" action="#" className="scroll-mt-32 rounded-3xl bg-white p-6 shadow-card ring-1 ring-navy-900/5 sm:p-8">
+    <form id="bao-gia" action={action} className="scroll-mt-32 rounded-3xl bg-white p-6 shadow-card ring-1 ring-navy-900/5 sm:p-8">
       {!compact && (
         <div className="mb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-700">Đăng ký nhận báo giá sỉ</p>
@@ -25,10 +43,21 @@ export function QuoteForm({ compact = false }: { compact?: boolean }) {
       </div>
       <div className="mt-5 flex flex-col gap-1.5">
         <label htmlFor="message" className="text-xs font-semibold uppercase tracking-wider text-ink-500">Yêu cầu thêm</label>
-        <textarea id="message" name="message" rows={4} placeholder="Mã set quà quan tâm (VD: TQG01), ngày cần giao, địa chỉ nhận hàng..." className="rounded-xl border border-cream-300 bg-cream-50 px-4 py-3 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-gold-400" />
+        <textarea id="message" name="message" rows={4} defaultValue={preset ? `Set quà quan tâm: ${preset}` : undefined} placeholder="Mã set quà quan tâm (VD: TQG01), ngày cần giao, địa chỉ nhận hàng..." className="rounded-xl border border-cream-300 bg-cream-50 px-4 py-3 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-gold-400" />
       </div>
-      <Button type="submit" variant="gold" size="lg" className="mt-6 w-full sm:w-auto">Gửi yêu cầu báo giá</Button>
-      <p className="mt-3 text-xs text-ink-400">Thông tin của bạn được bảo mật theo Chính sách bảo mật. Giai đoạn hiện tại form chưa nối hệ thống gửi thông báo.</p>
+      {/* Honeypot chống bot – người thật không thấy */}
+      <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+        <label htmlFor="website">Website</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+      <input type="hidden" name="pageUrl" value={pathname} />
+      {state && !state.ok && (
+        <p className="mt-4 flex items-center gap-2 rounded-xl bg-ruby-50 px-4 py-3 text-sm font-medium text-ruby-700"><AlertCircle className="size-4" /> {state.message}</p>
+      )}
+      <Button type="submit" variant="gold" size="lg" className="mt-6 w-full sm:w-auto" disabled={pending}>
+        {pending ? <><Loader2 className="size-4 animate-spin" /> Đang gửi...</> : "Gửi yêu cầu báo giá"}
+      </Button>
+      <p className="mt-3 text-xs text-ink-400">{note || "Thông tin của bạn được bảo mật theo Chính sách bảo mật và chỉ dùng để tư vấn báo giá."}</p>
     </form>
   );
 }

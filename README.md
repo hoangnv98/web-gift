@@ -2,6 +2,26 @@
 
 Website quà Tết, quà Trung thu và quà tặng doanh nghiệp của **CÔNG TY TNHH T&Q GIFT VIỆT NAM**.
 
+## Dữ liệu từ CMS (tqgift-admin)
+
+Từ 16/10/2026 storefront không còn dữ liệu tĩnh trong `src/data`. Toàn bộ sản phẩm, danh mục, blog, chính sách,
+cài đặt website, menu, trang chủ, B2B và SEO đọc từ **tqgift-admin** (Payload CMS, repo `hoangnv98/tqgift-admin`)
+qua REST tại `CMS_URL`.
+
+```bash
+cp .env.example .env.local      # CMS_URL, NEXT_PUBLIC_SITE_URL, REVALIDATE_SECRET (trùng với admin)
+pnpm dev                        # http://localhost:3001 – admin phải chạy ở http://localhost:3000
+```
+
+- `src/lib/cms.ts`: các hàm `getProducts`, `getPosts`, `getSettings`, `getHomePage`… dùng `use cache` + `cacheTag`,
+  nên trang vẫn static; admin gọi `POST /api/revalidate` (header `x-revalidate-secret`) để làm mới theo tag.
+- `src/lib/catalogue.ts`: khoảng giá, sắp xếp, nhãn và các hàm lọc thuần logic.
+- `src/lib/payload-types.ts`: copy từ admin (`pnpm generate:types` bên admin) mỗi khi schema đổi.
+- Form báo giá gửi qua Server Action `src/app/actions/quote.ts` → `POST {CMS_URL}/api/quote-requests`.
+- Ảnh phục vụ từ admin (`/api/media/...`) hoặc Cloudflare R2 (`CMS_MEDIA_URL`). Khi CMS chạy local, `next.config.ts`
+  bật `images.dangerouslyAllowLocalIP` để `next/image` tải được ảnh từ localhost.
+- Build production cần admin đang chạy (Vercel: deploy admin trước, đặt `CMS_URL` trỏ tới admin).
+
 ## Tech stack
 
 | Lớp | Lựa chọn | Lý do |
@@ -36,24 +56,29 @@ pnpm lint
 
 Khác: header sticky 3 tầng (topbar · header navy có tìm kiếm gợi ý tức thì · thanh điều hướng với dropdown DANH MỤC + nút CATALOGUE vàng kim), popup xác minh 18+ khi vào danh mục rượu vang, 3 nút nổi (Zalo / Hotline / Catalogue), footer pháp nhân + vị trí logo Bộ Công Thương & DMCA.
 
-## "Admin tạm thời" – chỉnh ở đâu
+## Quản trị nội dung – chỉnh ở đâu
 
-| Việc | File |
+Mọi nội dung chỉnh trong **tqgift-admin** (`/admin`), storefront tự cập nhật sau vài giây nhờ revalidate theo tag:
+
+| Việc | Vị trí trong admin |
 | --- | --- |
-| Tên, hotline, Zalo, địa chỉ pháp nhân, menu, dropdown danh mục | `src/data/site.ts` |
-| Thêm / sửa giá / ẩn set quà (`hidden: true`) → `/catalogue` tự cập nhật khi build | `src/data/catalogue.ts` |
-| Bật/tắt khối logo đối tác 5.1 và 5.2, thêm logo, sửa tiêu đề; bảng chiết khấu B2B | `src/data/settings.ts` |
-| Bài blog | `src/data/blog.ts` |
-| Nội dung 5 chính sách | `src/data/policies.ts` |
-| Ảnh | `src/lib/images.ts` + `images.remotePatterns` trong `next.config.ts` |
+| Tên, hotline, Zalo, địa chỉ pháp nhân, logo BCT/DMCA | Cài đặt → Thông tin website |
+| Menu chính, dropdown danh mục, thanh thông báo | Cài đặt → Menu điều hướng |
+| Hero slider, bật/tắt khối, kệ sản phẩm, logo đối tác 5.1 / 5.2 | Cài đặt → Trang chủ |
+| Bảng chiết khấu, dịch vụ in logo, quy trình đặt hàng | Cài đặt → Quà doanh nghiệp (B2B) |
+| Thêm / sửa giá / ẩn (chuyển về bản nháp hoặc "Hết hàng") set quà | Sản phẩm |
+| Nhóm, chất liệu, tag (cổng 18+) | Sản phẩm → Nhóm / Chất liệu / Thành phần & tag |
+| Bài blog, chính sách | Nội dung |
+| Lead từ form báo giá, khách hàng | Khách hàng |
+| Ảnh | Nội dung → Thư viện ảnh (hoặc upload ngay trong form sản phẩm) |
 
-Thay logo thật: sửa `LogoMark` trong `src/components/ui/logo.tsx`. Thay 2 ô placeholder Bộ Công Thương / DMCA trong `src/components/layout/footer.tsx` bằng logo chính thức sau khi đăng ký.
+Còn lại trong code: ảnh biên tập cố định (About, hero các trang phụ) ở `src/lib/images.ts`; logo SVG placeholder `LogoMark` trong `src/components/ui/logo.tsx`.
 
 ## Lộ trình mở rộng (giai đoạn 2)
 
-1. **CMS / Admin** – Payload CMS (self-host, có giao diện quản trị sẵn) hoặc Sanity. Model: Product, Category, PartnerLogo, HomeSettings (toggle 5.1/5.2), Post, Policy. Thay các file `src/data/*.ts` bằng hàm fetch + `"use cache"` / `cacheTag`, webhook CMS gọi `revalidateTag` → `/catalogue` cập nhật ngay khi admin sửa giá hoặc ẩn sản phẩm.
-2. **Form báo giá** – Server Action trong `src/components/b2b/quote-form.tsx`: validate bằng Zod, gửi Zalo OA API / Email (Resend) / Telegram Bot, lưu lead vào CMS.
-3. **Ảnh thật** – upload lên Cloudinary / Vercel Blob; `next/image` đã bật AVIF/WebP.
+1. ~~CMS / Admin~~ – đã xong: Payload CMS (`tqgift-admin`), fetch + `use cache` / `cacheTag`, admin gọi `/api/revalidate`.
+2. ~~Form báo giá~~ – đã xong: Server Action → `quote-requests`, admin báo qua Resend / Telegram. Có thể thêm Zalo OA sau.
+3. **Ảnh thật** – upload trong admin, lưu Cloudflare R2; `next/image` đã bật AVIF/WebP.
 4. **Giỏ hàng & thanh toán** – chuyển `store.ts` sang server (Prisma + PostgreSQL), tích hợp VNPay / MoMo nếu bán lẻ.
 5. **Tìm kiếm** – khi vượt ~200 sản phẩm chuyển sang Meilisearch / Algolia.
 6. **Analytics** – GA4, Meta Pixel, Zalo Pixel; Google Search Console với sitemap có sẵn.

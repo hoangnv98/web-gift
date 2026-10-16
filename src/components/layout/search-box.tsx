@@ -6,16 +6,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
-import { unsplash, img } from "@/lib/images";
-import { searchProducts } from "@/data/catalogue";
+import type { ProductLite } from "@/lib/catalogue";
 
-export function SearchBox({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
+function search(products: ProductLite[], q: string, limit = 6) {
+  const s = q.trim().toLowerCase();
+  if (!s) return [];
+  return products.filter((p) => p.name.toLowerCase().includes(s) || p.code.toLowerCase().includes(s)).slice(0, limit);
+}
+
+export function SearchBox({ products, className, onNavigate }: { products: ProductLite[]; className?: string; onNavigate?: () => void }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const id = useId();
   const blurTimer = useRef<number | null>(null);
-  const results = searchProducts(q, 6);
+  const results = search(products, q);
 
   const go = () => {
     const s = q.trim();
@@ -26,11 +31,7 @@ export function SearchBox({ className, onNavigate }: { className?: string; onNav
 
   return (
     <div className={cn("relative", className)}>
-      <form
-        role="search"
-        onSubmit={(e) => { e.preventDefault(); go(); }}
-        className="flex h-11 items-center overflow-hidden rounded-full bg-white ring-1 ring-white/20 focus-within:ring-2 focus-within:ring-gold-400"
-      >
+      <form role="search" onSubmit={(e) => { e.preventDefault(); go(); }} className="flex h-11 items-center overflow-hidden rounded-full bg-white ring-1 ring-white/20 focus-within:ring-2 focus-within:ring-gold-400">
         <input
           id={id}
           type="search"
@@ -45,13 +46,9 @@ export function SearchBox({ className, onNavigate }: { className?: string; onNav
           aria-controls={`${id}-list`}
         />
         {q && (
-          <button type="button" onClick={() => setQ("")} className="grid size-8 place-items-center text-ink-400 hover:text-ink-900" aria-label="Xoá">
-            <X className="size-4" />
-          </button>
+          <button type="button" onClick={() => setQ("")} className="grid size-8 place-items-center text-ink-400 hover:text-ink-900" aria-label="Xoá"><X className="size-4" /></button>
         )}
-        <button type="submit" className="grid h-full w-12 place-items-center bg-gold-gradient text-navy-900 transition hover:brightness-105" aria-label="Tìm">
-          <Search className="size-4" strokeWidth={2.5} />
-        </button>
+        <button type="submit" className="grid h-full w-12 place-items-center bg-gold-gradient text-navy-900 transition hover:brightness-105" aria-label="Tìm"><Search className="size-4" strokeWidth={2.5} /></button>
       </form>
 
       {open && q.trim() && (
@@ -63,8 +60,8 @@ export function SearchBox({ className, onNavigate }: { className?: string; onNav
               {results.map((p) => (
                 <li key={p.slug}>
                   <Link href={`/catalogue/${p.slug}`} onClick={() => { setOpen(false); onNavigate?.(); }} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-cream-100">
-                    <span className="relative size-12 shrink-0 overflow-hidden rounded-lg">
-                      <Image src={unsplash(img[p.images[0]], 120, 120)} alt="" fill sizes="48px" className="object-cover" />
+                    <span className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-cream-100">
+                      {p.thumb && <Image src={p.thumb} alt="" fill sizes="48px" className="object-cover" />}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold text-navy-900">{p.name}</span>
@@ -75,9 +72,7 @@ export function SearchBox({ className, onNavigate }: { className?: string; onNav
                 </li>
               ))}
               <li className="border-t border-cream-200 mt-1 pt-1">
-                <button type="button" onClick={go} className="w-full rounded-xl px-4 py-2 text-left text-sm font-semibold text-gold-700 hover:bg-cream-100">
-                  Xem tất cả kết quả cho “{q.trim()}” →
-                </button>
+                <button type="button" onClick={go} className="w-full rounded-xl px-4 py-2 text-left text-sm font-semibold text-gold-700 hover:bg-cream-100">Xem tất cả kết quả cho “{q.trim()}” →</button>
               </li>
             </ul>
           )}

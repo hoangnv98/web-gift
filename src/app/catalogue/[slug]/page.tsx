@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { ChevronRight, Phone, MessageCircle, Printer, Truck, FileCheck2 } from "lucide-react";
 import { formatPrice, discountPercent } from "@/lib/utils";
-import { getMaterial, getProduct, getRelated, occasionLabel, products } from "@/data/catalogue";
-import { site } from "@/data/site";
+import { getProduct, getProducts, getSettings, siteUrl } from "@/lib/cms";
+import { getRelated, occasionLabel } from "@/lib/catalogue";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,25 +17,40 @@ import { AddToCartButton, WishlistButton } from "@/components/catalogue/product-
 import { AgeGate } from "@/components/layout/age-gate";
 
 export async function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+  return (await getProducts()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/catalogue/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) return {};
-  return { title: `${product.name} ${product.code}`, description: product.tagline, alternates: { canonical: `/catalogue/${slug}` } };
+  return {
+    title: product.seo?.title || `${product.name} ${product.code}`,
+    description: product.seo?.description || product.tagline,
+    alternates: { canonical: `/catalogue/${slug}` },
+    openGraph: { images: [{ url: (product.seo?.image ?? product.images[0])?.src ?? "" }] },
+  };
 }
 
-export default async function ProductPage({ params }: PageProps<"/catalogue/[slug]">) {
+const availabilitySchema = { "con-hang": "https://schema.org/InStock", "dat-truoc": "https://schema.org/PreOrder", "het-hang": "https://schema.org/OutOfStock" } as const;
+const availabilityLabel = { "con-hang": "Còn hàng", "dat-truoc": "Đặt trước", "het-hang": "Hết hàng" } as const;
+
+/** Đọc params bên trong <Suspense> để app shell vẫn prerender được (Next 16 cache components). */
+export default function ProductPage(props: PageProps<"/catalogue/[slug]">) {
+  return (
+    <Suspense fallback={<Container className="py-12"><div className="h-[70vh] animate-pulse rounded-3xl bg-cream-200" /></Container>}>
+      <ProductDetail params={props.params} />
+    </Suspense>
+  );
+}
+
+async function ProductDetail({ params }: Pick<PageProps<"/catalogue/[slug]">, "params">) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const [product, products, site] = await Promise.all([getProduct(slug), getProducts(), getSettings()]);
   if (!product) notFound();
 
-  const material = getMaterial(product.material);
   const discount = discountPercent(product.price, product.originalPrice);
-  const related = getRelated(product);
-  const hasWine = product.tags.includes("ruou-vang");
+  const related = getRelated(products, product);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -42,14 +58,15 @@ export default async function ProductPage({ params }: PageProps<"/catalogue/[slu
     name: product.name,
     sku: product.code,
     description: product.description,
+    image: product.images.map((i) => i.src),
     brand: { "@type": "Brand", name: site.name },
-    offers: { "@type": "Offer", priceCurrency: "VND", price: product.price, availability: "https://schema.org/InStock", url: `${site.url}/catalogue/${product.slug}` },
+    offers: { "@type": "Offer", priceCurrency: "VND", price: product.price, availability: availabilitySchema[product.availability], url: `${siteUrl}/catalogue/${product.slug}` },
   };
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <AgeGate active={hasWine} />
+      <AgeGate active={product.ageGate} brand={site.name} />
       <Container className="py-8 lg:py-12">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-ink-400">
           <Link href="/" className="hover:text-ruby-700">Trang chủ</Link><ChevronRight className="size-3.5" />
@@ -64,6 +81,7 @@ export default async function ProductPage({ params }: PageProps<"/catalogue/[slu
             <div className="flex flex-wrap items-center gap-2">
               {product.badge && <Badge kind={product.badge} />}
               <span className="rounded-md border border-ruby-700 bg-ruby-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-ruby-700">Mã: {product.code}</span>
+              {product.availability !== "con-hang" && <span className="rounded-md bg-cream-200 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-ink-600">{availabilityLabel[product.availability]}</span>}
             </div>
             <h1 className="mt-4 text-balance text-3xl font-bold uppercase leading-tight text-ruby-700 sm:text-4xl">{product.name}</h1>
             <p className="mt-3 text-lg text-ink-500">{product.tagline}</p>
@@ -81,7 +99,7 @@ export default async function ProductPage({ params }: PageProps<"/catalogue/[slu
 
             <dl className="mt-6 grid grid-cols-2 gap-4 text-sm">
               <div className="rounded-2xl bg-cream-100 p-4"><dt className="text-xs font-semibold uppercase tracking-wider text-ink-400">Dịp tặng</dt><dd className="mt-1 font-semibold text-navy-900">{occasionLabel(product.occasion)}</dd></div>
-              <div className="rounded-2xl bg-cream-100 p-4"><dt className="text-xs font-semibold uppercase tracking-wider text-ink-400">Chất liệu</dt><dd className="mt-1 font-semibold text-navy-900">{material.label}</dd></div>
+              <div className="rounded-2xl bg-cream-100 p-4"><dt className="text-xs font-semibold uppercase tracking-wider text-ink-400">Chất liệu</dt><dd className="mt-1 font-semibold text-navy-900">{product.material.label}</dd></div>
             </dl>
 
             <div className="mt-8">
@@ -100,7 +118,7 @@ export default async function ProductPage({ params }: PageProps<"/catalogue/[slu
             <div className="mt-3 flex flex-wrap gap-3">
               <Button href="/qua-doanh-nghiep#bao-gia" variant="gold" className="flex-1">Nhận báo giá sỉ</Button>
               <Button href={site.hotlineHref} variant="outline"><Phone className="size-4" /> {site.hotline}</Button>
-              <Button href={site.zalo} variant="ghost" className="px-4" aria-label="Zalo"><MessageCircle className="size-5" /></Button>
+              {site.zalo && <Button href={site.zalo} variant="ghost" className="px-4" aria-label="Zalo"><MessageCircle className="size-5" /></Button>}
             </div>
 
             <ul className="mt-8 grid gap-3 text-sm text-ink-600">
@@ -111,10 +129,12 @@ export default async function ProductPage({ params }: PageProps<"/catalogue/[slu
           </div>
         </div>
 
-        <div className="mt-16 max-w-3xl">
-          <h2 className="text-2xl font-semibold text-navy-900">Mô tả sản phẩm</h2>
-          <p className="mt-4 text-pretty leading-relaxed text-ink-600">{product.description}</p>
-        </div>
+        {product.description && (
+          <div className="mt-16 max-w-3xl">
+            <h2 className="text-2xl font-semibold text-navy-900">Mô tả sản phẩm</h2>
+            <p className="mt-4 whitespace-pre-line text-pretty leading-relaxed text-ink-600">{product.description}</p>
+          </div>
+        )}
       </Container>
 
       {related.length > 0 && (

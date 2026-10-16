@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { site } from "@/data/site";
 
 /** Logo tròn T&Q GIFT – nền navy, chữ vàng kim. Thay bằng file logo thật khi có. */
 export function LogoMark({ className }: { className?: string }) {
@@ -20,14 +19,14 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className, tone = "dark", compact = false }: { className?: string; tone?: "light" | "dark"; compact?: boolean }) {
+export function Logo({ className, tone = "dark", compact = false, name = "T&Q GIFT", tagline = "Quà tặng doanh nghiệp cao cấp" }: { className?: string; tone?: "light" | "dark"; compact?: boolean; name?: string; tagline?: string }) {
   return (
-    <Link href="/" className={cn("group inline-flex items-center gap-3", className)} aria-label={site.name}>
+    <Link href="/" className={cn("group inline-flex items-center gap-3", className)} aria-label={name}>
       <LogoMark className="size-12 transition-transform duration-500 ease-out-expo group-hover:rotate-6" />
       {!compact && (
         <span className="flex flex-col leading-none">
-          <span className={cn("font-display text-[1.35rem] font-bold tracking-tight", tone === "dark" ? "text-cream-50" : "text-navy-900")}>{site.name}</span>
-          <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.22em] text-gold-400">{site.tagline}</span>
+          <span className={cn("font-display text-[1.35rem] font-bold tracking-tight", tone === "dark" ? "text-cream-50" : "text-navy-900")}>{name}</span>
+          <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.22em] text-gold-400">{tagline}</span>
         </span>
       )}
     </Link>

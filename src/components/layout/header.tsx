@@ -5,14 +5,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, ChevronDown, Heart, LayoutGrid, Menu, Phone, ShoppingBag, X } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
-import { site } from "@/data/site";
-import { getProduct } from "@/data/catalogue";
+import type { Navigation, Settings } from "@/lib/cms";
+import type { ProductLite } from "@/lib/catalogue";
 import { useStore } from "@/lib/store";
 import { Logo } from "@/components/ui/logo";
 import { Container } from "@/components/ui/container";
 import { SearchBox } from "./search-box";
 
-export function Header() {
+export interface HeaderProps {
+  settings: Pick<Settings, "name" | "slogan" | "tagline" | "hotline" | "hotlineHref">;
+  navigation: Navigation;
+  products: ProductLite[];
+}
+
+export function Header({ settings: site, navigation, products }: HeaderProps) {
   const pathname = usePathname();
   // Menu "mở" chỉ với pathname lúc mở -> điều hướng sẽ tự đóng, không cần effect.
   const [openPath, setOpenPath] = useState<string | null>(null);
@@ -21,8 +27,10 @@ export function Header() {
   const catOpen = catPath === pathname;
   const { cart, wishlist } = useStore();
 
+  const priceOf = (slug: string) => products.find((p) => p.slug === slug)?.price ?? 0;
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
-  const cartTotal = Object.entries(cart).reduce((sum, [slug, qty]) => sum + (getProduct(slug)?.price ?? 0) * qty, 0);
+  const cartTotal = Object.entries(cart).reduce((sum, [slug, qty]) => sum + priceOf(slug) * qty, 0);
+  const hasHot = navigation.megaMenu.some((c) => c.items.some((i) => i.hot));
 
   return (
     <header className="sticky top-0 z-50 shadow-[0_8px_30px_-18px_rgb(11_25_44/0.6)]">
@@ -31,7 +39,7 @@ export function Header() {
         <Container className="flex h-9 items-center justify-between gap-4 text-xs">
           <p className="truncate">
             <span className="font-semibold text-gold-300">{site.name}</span>
-            <span className="hidden sm:inline"> – {site.slogan}</span>
+            <span className="hidden sm:inline"> – {navigation.announcement?.text || site.slogan}</span>
           </p>
           <a href={site.hotlineHref} className="flex shrink-0 items-center gap-1.5 font-semibold hover:text-gold-300">
             <Phone className="size-3.5 text-gold-400" />
@@ -43,8 +51,8 @@ export function Header() {
       {/* Main header */}
       <div className="bg-navy-900 text-cream-50">
         <Container className="flex h-[76px] items-center gap-4 lg:gap-8">
-          <Logo tone="dark" />
-          <SearchBox className="hidden flex-1 md:block lg:mx-6" />
+          <Logo tone="dark" name={site.name} tagline={site.tagline} />
+          <SearchBox products={products} className="hidden flex-1 md:block lg:mx-6" />
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
             <Link href="/yeu-thich" className="relative grid size-11 place-items-center rounded-full hover:bg-white/10" aria-label="Sản phẩm yêu thích">
               <Heart className="size-5" />
@@ -66,7 +74,7 @@ export function Header() {
           </div>
         </Container>
         <Container className="pb-3 md:hidden">
-          <SearchBox />
+          <SearchBox products={products} />
         </Container>
       </div>
 
@@ -76,17 +84,19 @@ export function Header() {
           <div className="relative" onMouseEnter={() => setCatPath(pathname)} onMouseLeave={() => setCatPath(null)}>
             <button type="button" onClick={() => setCatPath(catOpen ? null : pathname)} className="relative flex h-12 items-center gap-2 bg-navy-900 px-4 text-sm font-bold uppercase tracking-wide text-gold-300 hover:bg-navy-950" aria-expanded={catOpen}>
               <LayoutGrid className="size-4" /> Danh mục sản phẩm <ChevronDown className={cn("size-4 transition-transform", catOpen && "rotate-180")} />
-              <span className="absolute -top-1.5 right-3 rounded-full bg-ruby-700 px-1.5 py-px text-[9px] font-bold tracking-wider text-white shadow">HOT</span>
+              {hasHot && <span className="absolute -top-1.5 right-3 rounded-full bg-ruby-700 px-1.5 py-px text-[9px] font-bold tracking-wider text-white shadow">HOT</span>}
             </button>
             <div className={cn("absolute left-0 top-full z-50 w-[720px] origin-top-left rounded-b-2xl bg-white p-6 text-ink-900 shadow-card-hover ring-1 ring-navy-900/10 transition-all duration-200", catOpen ? "visible scale-100 opacity-100" : "invisible scale-95 opacity-0")}>
               <div className="grid grid-cols-3 gap-6">
-                {site.megaMenu.map((col) => (
+                {navigation.megaMenu.map((col) => (
                   <div key={col.title}>
                     <p className="font-display text-lg font-semibold text-navy-900">{col.title}</p>
                     <ul className="mt-3 space-y-2">
                       {col.items.map((it) => (
                         <li key={it.href}>
-                          <Link href={it.href} onClick={() => setCatPath(null)} className="block rounded-lg px-2 py-1.5 text-sm text-ink-700 hover:bg-cream-100 hover:text-ruby-700">{it.label}</Link>
+                          <Link href={it.href} onClick={() => setCatPath(null)} className="block rounded-lg px-2 py-1.5 text-sm text-ink-700 hover:bg-cream-100 hover:text-ruby-700">
+                            {it.label}{it.hot && <span className="ml-2 rounded-full bg-ruby-700 px-1.5 text-[9px] font-bold text-white">HOT</span>}
+                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -100,7 +110,7 @@ export function Header() {
           </div>
 
           <nav className="flex flex-1 items-center justify-center gap-1" aria-label="Chính">
-            {site.nav.map((item) => {
+            {navigation.mainNav.map((item) => {
               const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
               return (
                 <Link key={item.href} href={item.href} className={cn("relative px-3 py-2 text-[13px] font-semibold uppercase tracking-wide text-cream-200 transition-colors hover:text-gold-300", active && "text-gold-300")}>
@@ -122,11 +132,11 @@ export function Header() {
         <div className="min-h-0">
           <Container className="flex flex-col gap-1 border-t border-white/10 py-4">
             <Link href="/catalogue" className="mb-2 flex items-center justify-center gap-2 rounded-full bg-gold-gradient px-4 py-3 text-sm font-bold uppercase text-navy-900"><BookOpen className="size-4" /> Catalogue online</Link>
-            {site.nav.map((item) => (
+            {navigation.mainNav.map((item) => (
               <Link key={item.href} href={item.href} className="rounded-xl px-3 py-3 text-base font-medium hover:bg-white/10">{item.label}</Link>
             ))}
             <p className="mt-3 px-3 text-xs font-semibold uppercase tracking-[0.2em] text-gold-300">Danh mục sản phẩm</p>
-            {site.megaMenu.flatMap((c) => [...c.items] as { label: string; href: string }[]).map((it) => (
+            {navigation.megaMenu.flatMap((c) => c.items).map((it) => (
               <Link key={it.href} href={it.href} className="rounded-xl px-3 py-2.5 text-sm text-cream-200 hover:bg-white/10">{it.label}</Link>
             ))}
           </Container>

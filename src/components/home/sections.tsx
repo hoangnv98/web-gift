@@ -3,9 +3,8 @@ import Link from "next/link";
 import { ArrowRight, BadgePercent, FileCheck2, Heart, Printer, Sparkles, Truck, Handshake, Gem, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { unsplash, img } from "@/lib/images";
-import { byGroup, byTag, priceTiers, type Product } from "@/data/catalogue";
-import { homeSettings, type LogoBlock } from "@/data/settings";
-import { site } from "@/data/site";
+import { getHomePage, getPosts, getProducts, getSettings, type LogoBlock, type Product } from "@/lib/cms";
+import { byCategory, priceTiers } from "@/lib/catalogue";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Button } from "@/components/ui/button";
@@ -101,13 +100,14 @@ export function Shelf({ eyebrow, title, href, products, className }: { eyebrow: 
   );
 }
 
-export function Shelves() {
+/** Kệ sản phẩm trang chủ – cấu hình trong Admin → Trang chủ → Kệ sản phẩm. */
+export async function Shelves() {
+  const [home, products] = await Promise.all([getHomePage(), getProducts()]);
   return (
     <>
-      <Shelf eyebrow="Kệ 01" title="Hộp Quà Tết Cao Cấp" href="/catalogue?nhom=hop-qua-tet" products={byGroup("hop-qua-tet")} />
-      <Shelf eyebrow="Kệ 02" title="Giỏ Quà Rượu Vang Nhập Khẩu" href="/catalogue?nhom=gio-qua-tet&tag=ruou-vang" products={byTag("ruou-vang").filter((p) => p.kind === "gio")} className="bg-cream-100" />
-      <Shelf eyebrow="Kệ 03" title="Quà Trung Thu" href="/catalogue?nhom=trung-thu" products={byGroup("trung-thu")} />
-      <Shelf eyebrow="Kệ 04" title="Quà Tặng Sự Kiện, 8/3 & Sinh Nhật Công Ty" href="/catalogue?nhom=su-kien" products={byGroup("su-kien")} className="bg-cream-100" />
+      {home.shelves.map((s, i) => (
+        <Shelf key={s.category.slug + i} eyebrow={`Kệ ${String(i + 1).padStart(2, "0")}`} title={s.title} href={`/catalogue?nhom=${s.category.slug}`} products={byCategory(products, s.category, s.limit)} className={i % 2 === 1 ? "bg-cream-100" : undefined} />
+      ))}
     </>
   );
 }
@@ -162,20 +162,22 @@ function LogoMarquee({ block }: { block: LogoBlock }) {
   );
 }
 
-export function PartnerLogos() {
-  const { partners, press } = homeSettings;
-  if (!partners.enabled && !press.enabled) return null; // Tắt cả hai -> trang chủ co gọn, không để khoảng trắng
+export async function PartnerLogos() {
+  const { partners, press } = await getHomePage();
+  const showPartners = partners.enabled && partners.logos.length > 0;
+  const showPress = press.enabled && press.logos.length > 0;
+  if (!showPartners && !showPress) return null; // Tắt cả hai -> trang chủ co gọn, không để khoảng trắng
   return (
     <section className="bg-cream-100 py-20">
       <Container>
-        {partners.enabled && (
+        {showPartners && (
           <div>
             <SectionHeading eyebrow="Khối 5.1" title={partners.title.toUpperCase()} description={partners.subtitle} />
             <LogoMarquee block={partners} />
           </div>
         )}
-        {press.enabled && (
-          <div className={cn(partners.enabled && "mt-16")}>
+        {showPress && (
+          <div className={cn(showPartners && "mt-16")}>
             <SectionHeading eyebrow="Khối 5.2" title={press.title.toUpperCase()} description={press.subtitle} />
             <div className="mt-10 flex flex-wrap justify-center gap-5">
               {press.logos.map((l) => <LogoTile key={l.name} {...l} />)}
@@ -187,8 +189,38 @@ export function PartnerLogos() {
   );
 }
 
+/* --------------------- Section 5b – Bài viết mới nhất ------------------- */
+export async function LatestPosts({ limit = 3 }: { limit?: number }) {
+  const posts = (await getPosts()).slice(0, limit);
+  if (posts.length === 0) return null;
+  return (
+    <section className="py-20">
+      <Container>
+        <div className="flex items-end justify-between gap-6">
+          <SectionHeading align="left" eyebrow="Blog" title="Cẩm nang quà tặng doanh nghiệp" />
+          <Button href="/blog" variant="outline" size="sm" className="shrink-0">Xem tất cả <ArrowRight className="size-4" /></Button>
+        </div>
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {posts.map((p) => (
+            <article key={p.slug} className="group overflow-hidden rounded-3xl bg-white shadow-card ring-1 ring-navy-900/5 transition hover:-translate-y-1 hover:shadow-card-hover">
+              <Link href={`/blog/${p.slug}`} className="relative block aspect-[16/10] overflow-hidden bg-cream-100">
+                {p.cover.src && <Image src={p.cover.src} alt={p.cover.alt} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />}
+              </Link>
+              <div className="p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gold-700">{p.category}</p>
+                <h3 className="mt-2 text-lg font-semibold leading-snug text-navy-900"><Link href={`/blog/${p.slug}`} className="hover:text-ruby-700">{p.title}</Link></h3>
+              </div>
+            </article>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
 /* --------------- Section 6 – Câu chuyện văn hoá & SEO chân trang --------- */
-export function BrandStory({ compact = false }: { compact?: boolean }) {
+export async function BrandStory({ compact = false }: { compact?: boolean }) {
+  const site = await getSettings();
   return (
     <section className={cn("bg-cream-lattice", compact ? "py-16" : "py-20 lg:py-28")}>
       <Container className="max-w-4xl">

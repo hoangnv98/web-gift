@@ -4,12 +4,11 @@ import { useRouter } from "next/navigation";
 import { Wine } from "lucide-react";
 import { store, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { site } from "@/data/site";
 
 const FLAG = "age18";
 
 /** Popup xác minh 18+ khi xem danh mục rượu vang. */
-export function AgeGate({ active }: { active: boolean }) {
+export function AgeGate({ active, brand = "T&Q GIFT" }: { active: boolean; brand?: string }) {
   const { flags } = useStore();
   const router = useRouter();
   if (!active || flags[FLAG]) return null;
@@ -22,7 +21,7 @@ export function AgeGate({ active }: { active: boolean }) {
         <p className="mt-3 text-sm leading-relaxed text-ink-500">
           Danh mục này có sản phẩm rượu vang. Theo quy định kinh doanh rượu trên thương mại điện tử, vui lòng xác nhận bạn đã đủ 18 tuổi.
         </p>
-        <p className="mt-2 text-xs text-ink-400">{site.name} không bán rượu cho người dưới 18 tuổi và phụ nữ đang mang thai.</p>
+        <p className="mt-2 text-xs text-ink-400">{brand} không bán rượu cho người dưới 18 tuổi và phụ nữ đang mang thai.</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button variant="gold" className="flex-1" onClick={() => store.setFlag(FLAG, true)}>Tôi đã đủ 18 tuổi</Button>
           <Button variant="outline" className="flex-1" onClick={() => router.push("/")}>Chưa đủ 18 tuổi</Button>

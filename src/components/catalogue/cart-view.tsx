@@ -4,15 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
-import { unsplash, img } from "@/lib/images";
-import { getProduct } from "@/data/catalogue";
+import type { Product } from "@/lib/cms";
 import { store, useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "./product-card";
 
-export function CartView() {
+export function CartView({ products }: { products: Product[] }) {
   const { cart } = useStore();
-  const lines = Object.entries(cart).map(([slug, qty]) => ({ product: getProduct(slug)!, qty })).filter((l) => l.product);
+  const lines = Object.entries(cart).flatMap(([slug, qty]) => {
+    const product = products.find((p) => p.slug === slug);
+    return product ? [{ product, qty }] : [];
+  });
   const total = lines.reduce((s, l) => s + l.product.price * l.qty, 0);
 
   if (lines.length === 0) {
@@ -24,12 +26,16 @@ export function CartView() {
     );
   }
 
+  const codes = lines.map((l) => `${l.product.code} x${l.qty}`).join(", ");
+
   return (
     <div className="mt-10 grid gap-10 lg:grid-cols-12">
       <ul className="divide-y divide-cream-200 rounded-3xl bg-white shadow-card ring-1 ring-navy-900/5 lg:col-span-8">
         {lines.map(({ product, qty }) => (
           <li key={product.slug} className="flex gap-4 p-4 sm:p-5">
-            <Link href={`/catalogue/${product.slug}`} className="relative size-24 shrink-0 overflow-hidden rounded-2xl"><Image src={unsplash(img[product.images[0]], 240, 240)} alt="" fill sizes="96px" className="object-cover" /></Link>
+            <Link href={`/catalogue/${product.slug}`} className="relative size-24 shrink-0 overflow-hidden rounded-2xl bg-cream-100">
+              {product.images[0] && <Image src={product.images[0].thumb} alt="" fill sizes="96px" className="object-cover" />}
+            </Link>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-ruby-700">{product.code}</p>
               <Link href={`/catalogue/${product.slug}`} className="block truncate font-semibold text-navy-900 hover:text-ruby-700">{product.name}</Link>
@@ -51,16 +57,16 @@ export function CartView() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-300">Tạm tính</p>
         <p className="mt-2 font-display text-4xl font-bold text-gold-300">{formatPrice(total)}</p>
         <p className="mt-1 text-xs text-cream-200/70">Chưa gồm VAT và chiết khấu số lượng.</p>
-        <Button href="/qua-doanh-nghiep#bao-gia" variant="gold" size="lg" className="mt-6 w-full">Gửi yêu cầu báo giá</Button>
+        <Button href={`/qua-doanh-nghiep?san-pham=${encodeURIComponent(codes)}#bao-gia`} variant="gold" size="lg" className="mt-6 w-full">Gửi yêu cầu báo giá</Button>
         <button type="button" onClick={() => store.clearCart()} className="mt-3 w-full text-center text-xs text-cream-200/60 hover:text-cream-50">Xoá toàn bộ giỏ</button>
       </aside>
     </div>
   );
 }
 
-export function WishlistView() {
+export function WishlistView({ products }: { products: Product[] }) {
   const { wishlist } = useStore();
-  const items = wishlist.map((s) => getProduct(s)!).filter(Boolean);
+  const items = wishlist.flatMap((s) => products.filter((p) => p.slug === s));
   if (items.length === 0) {
     return (
       <div className="mt-10 rounded-3xl border border-dashed border-cream-400 bg-cream-50 p-12 text-center">
