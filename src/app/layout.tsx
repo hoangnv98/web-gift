@@ -1,37 +1,22 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro, Playfair_Display } from "next/font/google";
+import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { site } from "@/data/site";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { FloatingButtons } from "@/components/layout/floating-buttons";
 
-const body = Be_Vietnam_Pro({
-  variable: "--font-body",
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const display = Playfair_Display({
-  variable: "--font-display",
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
+const body = Plus_Jakarta_Sans({ variable: "--font-body", subsets: ["latin", "vietnamese"], weight: ["400", "500", "600", "700", "800"], display: "swap" });
+const display = Playfair_Display({ variable: "--font-display", subsets: ["latin", "vietnamese"], weight: ["400", "500", "600", "700", "800"], style: ["normal", "italic"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: {
-    default: `${site.name} – ${site.tagline}`,
-    template: `%s | ${site.name}`,
-  },
+  metadataBase: new URL(site.url),
+  title: { default: `${site.name} – ${site.slogan}`, template: `%s | ${site.name}` },
   description: site.description,
-  openGraph: {
-    title: `${site.name} – ${site.tagline}`,
-    description: site.description,
-    locale: "vi_VN",
-    type: "website",
-  },
+  keywords: ["quà tết doanh nghiệp", "hộp quà tết", "giỏ quà tết", "quà trung thu", "quà tặng doanh nghiệp", "T&Q Gift"],
+  openGraph: { title: `${site.name} – ${site.slogan}`, description: site.description, locale: "vi_VN", type: "website", siteName: site.name, url: site.url },
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -41,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <FloatingButtons />
       </body>
     </html>
   );

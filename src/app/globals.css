@@ -1,114 +1,121 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Design tokens — "Lộc Xuân" Tết gift catalogue
-   Palette: crimson (đỏ may mắn) · gold (vàng kim) · cream (giấy dó) · ink
+   Design tokens — T&Q GIFT
+   navy (chủ đạo) · gold (nhấn kim loại) · cream (nền) · ruby (lễ hội) · ink
 --------------------------------------------------------------------------- */
 @theme {
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display), Georgia, "Times New Roman", serif;
 
-  --color-crimson-50: #fcf0ef;
-  --color-crimson-100: #f7d9d7;
-  --color-crimson-200: #efb3b0;
-  --color-crimson-400: #c73a36;
-  --color-crimson-500: #b32824;
-  --color-crimson-600: #9c1f1c;
-  --color-crimson-700: #881917;
-  --color-crimson-800: #6c1211;
-  --color-crimson-900: #4d0c0b;
+  --color-navy-50: #eef2f8;
+  --color-navy-100: #d9e1ee;
+  --color-navy-200: #b3c3dd;
+  --color-navy-400: #3b5a8c;
+  --color-navy-500: #1f3a66;
+  --color-navy-700: #16325c;
+  --color-navy-800: #102542;
+  --color-navy-900: #0b192c;
+  --color-navy-950: #07111f;
 
-  --color-gold-50: #fdf9ec;
-  --color-gold-100: #f8efcf;
-  --color-gold-200: #f0dfa0;
-  --color-gold-300: #e5cb6e;
-  --color-gold-400: #d8b54a;
-  --color-gold-500: #c9a227;
-  --color-gold-600: #a8841c;
-  --color-gold-700: #866819;
-  --color-gold-800: #5e4a13;
+  --color-gold-50: #fdfaee;
+  --color-gold-100: #faf3d9;
+  --color-gold-200: #f5e6ad;
+  --color-gold-300: #ead98a;
+  --color-gold-400: #e0c45c;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #c59b27;
+  --color-gold-700: #aa7c11;
+  --color-gold-800: #7d5a0c;
 
-  --color-cream-50: #fcfaf5;
-  --color-cream-100: #f8f2e6;
-  --color-cream-200: #f0e6d2;
-  --color-cream-300: #e4d5b9;
-  --color-cream-400: #d2bd97;
+  --color-cream-50: #fffdfa;
+  --color-cream-100: #faf6f0;
+  --color-cream-200: #f1e9dd;
+  --color-cream-300: #e3d7c4;
+  --color-cream-400: #cdbc9f;
 
-  --color-ink-950: #140e0d;
-  --color-ink-900: #1c1412;
-  --color-ink-800: #2b201d;
-  --color-ink-700: #3d302b;
-  --color-ink-500: #6b5b55;
-  --color-ink-400: #8b7b74;
-  --color-ink-300: #ab9d96;
-  --color-ink-200: #d3cac5;
+  --color-ruby-50: #fbeeee;
+  --color-ruby-100: #f5d6d7;
+  --color-ruby-200: #e9adaf;
+  --color-ruby-500: #c0282c;
+  --color-ruby-600: #b0262a;
+  --color-ruby-700: #9b1b1e;
+  --color-ruby-800: #7a1416;
+  --color-ruby-900: #560d0f;
 
-  --shadow-card: 0 1px 2px rgb(28 20 18 / 0.04), 0 10px 30px -12px rgb(28 20 18 / 0.14);
-  --shadow-card-hover: 0 2px 4px rgb(28 20 18 / 0.05), 0 24px 48px -16px rgb(136 25 23 / 0.28);
-  --shadow-glow-gold: 0 0 0 1px rgb(201 162 39 / 0.35), 0 12px 32px -12px rgb(201 162 39 / 0.45);
+  --color-ink-950: #0f0d0c;
+  --color-ink-900: #1a1715;
+  --color-ink-800: #2a2522;
+  --color-ink-700: #3d3631;
+  --color-ink-500: #6b625b;
+  --color-ink-400: #8a817a;
+  --color-ink-300: #aaa29b;
+  --color-ink-200: #d4cec8;
+
+  --shadow-card: 0 1px 2px rgb(11 25 44 / 0.04), 0 10px 30px -12px rgb(11 25 44 / 0.16);
+  --shadow-card-hover: 0 2px 4px rgb(11 25 44 / 0.05), 0 24px 48px -16px rgb(11 25 44 / 0.3);
+  --shadow-gold: 0 0 0 1px rgb(212 175 55 / 0.45), 0 12px 32px -12px rgb(212 175 55 / 0.5);
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
+  html { scroll-behavior: smooth; }
   body {
-    background-color: var(--color-cream-50);
+    background-color: var(--color-cream-100);
     color: var(--color-ink-900);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  ::selection {
-    background: var(--color-gold-200);
-    color: var(--color-ink-900);
-  }
-  h1, h2, h3, h4 {
-    font-family: var(--font-display);
-    letter-spacing: -0.01em;
-  }
+  ::selection { background: var(--color-gold-200); color: var(--color-navy-900); }
+  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
 }
 
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
 
-  /* Gold foil text */
+  /* Gold gradient (#C59B27 -> #F5E6AD -> #AA7C11) */
+  .bg-gold-gradient {
+    background-image: linear-gradient(135deg, #c59b27 0%, #f5e6ad 50%, #aa7c11 100%);
+  }
+  .bg-gold-gradient-soft {
+    background-image: linear-gradient(135deg, #e9d48a 0%, #f8edc0 50%, #d9b857 100%);
+  }
   .text-gold-foil {
-    background: linear-gradient(110deg, #866819 0%, #c9a227 30%, #f0dfa0 50%, #c9a227 70%, #866819 100%);
+    background-image: linear-gradient(110deg, #aa7c11 0%, #d4af37 30%, #f5e6ad 50%, #d4af37 70%, #aa7c11 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+  .border-gold-gradient {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--color-cream-50), var(--color-cream-50)) padding-box,
+      linear-gradient(135deg, #c59b27, #f5e6ad, #aa7c11) border-box;
+  }
 
-  /* Subtle lattice pattern used on hero / section backgrounds */
-  .bg-tet-lattice {
+  .bg-navy-silk {
+    background-color: var(--color-navy-900);
+    background-image:
+      radial-gradient(1000px 420px at 0% 0%, rgb(212 175 55 / 0.14), transparent 60%),
+      radial-gradient(800px 400px at 100% 100%, rgb(255 255 255 / 0.06), transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cpath d='M28 4 52 28 28 52 4 28Z' fill='none' stroke='%23d4af37' stroke-opacity='0.09' stroke-width='1'/%3E%3C/svg%3E");
+  }
+  .bg-cream-lattice {
     background-color: var(--color-cream-100);
     background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 2 46 24 24 46 2 24Z' fill='none' stroke='%23c9a227' stroke-opacity='0.16' stroke-width='1'/%3E%3Ccircle cx='24' cy='24' r='1.6' fill='%23c9a227' fill-opacity='0.22'/%3E%3C/svg%3E");
-  }
-  .bg-crimson-silk {
-    background-color: var(--color-crimson-800);
-    background-image:
-      radial-gradient(1200px 500px at 10% -10%, rgb(201 162 39 / 0.18), transparent 60%),
-      radial-gradient(800px 400px at 100% 110%, rgb(255 255 255 / 0.08), transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cpath d='M28 4 52 28 28 52 4 28Z' fill='none' stroke='%23ffffff' stroke-opacity='0.07' stroke-width='1'/%3E%3C/svg%3E");
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M24 2 46 24 24 46 2 24Z' fill='none' stroke='%23d4af37' stroke-opacity='0.18' stroke-width='1'/%3E%3Ccircle cx='24' cy='24' r='1.6' fill='%23d4af37' fill-opacity='0.25'/%3E%3C/svg%3E");
   }
 
-  .ring-gold-inset {
-    box-shadow: inset 0 0 0 1px rgb(201 162 39 / 0.45);
-  }
-
-  .animate-fade-up {
-    animation: fade-up 0.8s var(--ease-out-expo) both;
-  }
+  .animate-fade-up { animation: fade-up 0.8s var(--ease-out-expo) both; }
   .animate-delay-1 { animation-delay: 0.1s; }
   .animate-delay-2 { animation-delay: 0.2s; }
   .animate-delay-3 { animation-delay: 0.3s; }
   .animate-delay-4 { animation-delay: 0.4s; }
-
+  .animate-ring { animation: ring 1.6s ease-in-out infinite; }
+  .animate-marquee { animation: marquee 40s linear infinite; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
@@ -117,8 +124,20 @@
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes ring {
+  0%, 100% { transform: rotate(0); }
+  10% { transform: rotate(-14deg); }
+  20% { transform: rotate(12deg); }
+  30% { transform: rotate(-10deg); }
+  40% { transform: rotate(8deg); }
+  50% { transform: rotate(0); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-up { animation: none; }
+  .animate-fade-up, .animate-ring, .animate-marquee { animation: none; }
   html { scroll-behavior: auto; }
 }

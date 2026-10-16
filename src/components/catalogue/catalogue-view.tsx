@@ -1,218 +1,147 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Check, SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  categories,
-  materials,
-  priceTiers,
-  products,
-  sortOptions,
-  type CategoryId,
-  type MaterialId,
-  type SortId,
-} from "@/data/catalogue";
-import { ProductCard } from "./product-card";
+import { groups, materials, priceTiers, sortOptions, visibleProducts, tags, type MaterialId, type SortId, type Tag } from "@/data/catalogue";
+import { CatalogueItem } from "./catalogue-item";
+import { AgeGate } from "@/components/layout/age-gate";
 import { Button } from "@/components/ui/button";
 
-type Filters = {
-  category: CategoryId | null;
-  material: MaterialId | null;
-  price: string | null;
-  sort: SortId;
-};
-
+/** Tham số URL: nhom, chat-lieu, gia, sap-xep, tag, q */
 export function CatalogueView() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [drawer, setDrawer] = useState(false);
+  const sp = useSearchParams();
 
-  const filters: Filters = {
-    category: (searchParams.get("category") as CategoryId) || null,
-    material: (searchParams.get("material") as MaterialId) || null,
-    price: searchParams.get("price"),
-    sort: (searchParams.get("sort") as SortId) || "featured",
+  const f = {
+    nhom: sp.get("nhom") || "tat-ca",
+    chatLieu: (sp.get("chat-lieu") as MaterialId | null) || null,
+    gia: sp.get("gia"),
+    sapXep: (sp.get("sap-xep") as SortId) || "mac-dinh",
+    tag: (sp.get("tag") as Tag | null) || null,
+    q: sp.get("q") || "",
   };
 
   const update = useCallback(
-    (patch: Partial<Record<keyof Filters, string | null>>) => {
-      const next = new URLSearchParams(searchParams.toString());
+    (patch: Record<string, string | null>) => {
+      const next = new URLSearchParams(sp.toString());
       for (const [k, v] of Object.entries(patch)) {
-        if (v === null || v === "" || (k === "sort" && v === "featured")) next.delete(k);
+        if (!v || v === "tat-ca" || v === "mac-dinh") next.delete(k);
         else next.set(k, v);
       }
       const qs = next.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [router, pathname, searchParams],
+    [router, pathname, sp],
   );
 
   const results = useMemo(() => {
-    const tier = priceTiers.find((t) => t.id === filters.price);
-    let list = products.filter((p) => {
-      if (filters.category && p.category !== filters.category) return false;
-      if (filters.material && p.material !== filters.material) return false;
-      if (tier) {
-        if (p.price < tier.min) return false;
-        if (tier.max !== null && p.price >= tier.max) return false;
-      }
+    const group = groups.find((g) => g.id === f.nhom) ?? groups[0];
+    const tier = priceTiers.find((t) => t.id === f.gia);
+    const q = f.q.trim().toLowerCase();
+    let list = visibleProducts.filter((p) => {
+      if (!group.match(p)) return false;
+      if (f.chatLieu && p.material !== f.chatLieu) return false;
+      if (f.tag && !p.tags.includes(f.tag)) return false;
+      if (tier && (p.price < tier.min || (tier.max !== null && p.price >= tier.max))) return false;
+      if (q && !(p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.items.some((i) => i.toLowerCase().includes(q)))) return false;
       return true;
     });
-    if (filters.sort === "price-asc") list = [...list].sort((a, b) => a.price - b.price);
-    if (filters.sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
-    if (filters.sort === "featured") list = [...list].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+    if (f.sapXep === "gia-tang") list = [...list].sort((a, b) => a.price - b.price);
+    if (f.sapXep === "gia-giam") list = [...list].sort((a, b) => b.price - a.price);
     return list;
-  }, [filters.category, filters.material, filters.price, filters.sort]);
+  }, [f.nhom, f.chatLieu, f.gia, f.sapXep, f.tag, f.q]);
 
-  const activeCount = [filters.category, filters.material, filters.price].filter(Boolean).length;
-  const clearAll = () => update({ category: null, material: null, price: null });
+  const activeCount = [f.nhom !== "tat-ca", f.chatLieu, f.gia, f.tag, f.q].filter(Boolean).length;
+  const tagInfo = tags.find((t) => t.id === f.tag);
 
-  const sidebar = (
-    <div className="space-y-8">
-      <FilterGroup title="Chất liệu">
-        <Option label="Tất cả" active={!filters.material} onClick={() => update({ material: null })} />
+  return (
+    <div>
+      <AgeGate active={!!tagInfo?.ageGate} />
+
+      {/* Tầng 1 – Nhóm chính (nền vàng đồng) */}
+      <PillRow label="Dịp tặng">
+        {groups.map((g) => (
+          <Pill key={g.id} tone="gold" active={f.nhom === g.id} onClick={() => update({ nhom: g.id })}>{g.label}</Pill>
+        ))}
+      </PillRow>
+
+      {/* Tầng 2 – Chất liệu */}
+      <PillRow label="Chất liệu & kiểu dáng">
+        <Pill active={!f.chatLieu} onClick={() => update({ "chat-lieu": null })}>Tất cả</Pill>
         {materials.map((m) => (
-          <Option key={m.id} label={m.name} active={filters.material === m.id} onClick={() => update({ material: filters.material === m.id ? null : m.id })} />
+          <Pill key={m.id} active={f.chatLieu === m.id} onClick={() => update({ "chat-lieu": f.chatLieu === m.id ? null : m.id })}>{m.label}</Pill>
         ))}
-      </FilterGroup>
-      <FilterGroup title="Khoảng giá">
-        <Option label="Tất cả" active={!filters.price} onClick={() => update({ price: null })} />
+      </PillRow>
+
+      {/* Tầng 3 – Khoảng giá */}
+      <PillRow label="Khoảng giá">
+        <Pill active={!f.gia} onClick={() => update({ gia: null })}>Tất cả</Pill>
         {priceTiers.map((t) => (
-          <Option key={t.id} label={t.label} active={filters.price === t.id} onClick={() => update({ price: filters.price === t.id ? null : t.id })} />
+          <Pill key={t.id} active={f.gia === t.id} onClick={() => update({ gia: f.gia === t.id ? null : t.id })}>{t.label}</Pill>
         ))}
-      </FilterGroup>
-      {activeCount > 0 && (
-        <button type="button" onClick={clearAll} className="inline-flex items-center gap-1.5 text-sm font-semibold text-crimson-700 hover:underline">
-          <X className="size-4" /> Xoá bộ lọc ({activeCount})
-        </button>
-      )}
-    </div>
-  );
+      </PillRow>
 
-  return (
-    <div>
-      {/* Category tabs */}
-      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-        <Tab label="Tất cả" active={!filters.category} onClick={() => update({ category: null })} />
-        {categories.map((c) => (
-          <Tab key={c.id} label={c.name} active={filters.category === c.id} onClick={() => update({ category: c.id })} />
+      {/* Tầng 4 – Sắp xếp */}
+      <PillRow label="Sắp xếp">
+        {sortOptions.map((s) => (
+          <Pill key={s.id} tone="navy" active={f.sapXep === s.id} onClick={() => update({ "sap-xep": s.id })}>{s.label}</Pill>
         ))}
-      </div>
+      </PillRow>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[240px_1fr]">
-        <aside className="hidden lg:block">
-          <div className="sticky top-32">{sidebar}</div>
-        </aside>
-
-        <div>
-          {/* Toolbar */}
-          <div className="flex items-center justify-between gap-3 border-b border-cream-300 pb-4">
-            <p className="text-sm text-ink-500">
-              <span className="font-semibold text-ink-900">{results.length}</span> sản phẩm
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setDrawer(true)}
-                className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-ink-800 lg:hidden"
-              >
-                <SlidersHorizontal className="size-4" /> Bộ lọc
-                {activeCount > 0 && <span className="grid size-5 place-items-center rounded-full bg-crimson-700 text-[11px] font-bold text-white">{activeCount}</span>}
-              </button>
-              <label className="relative">
-                <span className="sr-only">Sắp xếp</span>
-                <select
-                  value={filters.sort}
-                  onChange={(e) => update({ sort: e.target.value })}
-                  className="h-10 appearance-none rounded-full border border-cream-300 bg-white pl-4 pr-9 text-sm font-medium text-ink-800 focus:outline-none focus:ring-2 focus:ring-gold-400"
-                >
-                  {sortOptions.map((o) => (
-                    <option key={o.id} value={o.id}>{o.label}</option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-ink-400" />
-              </label>
-            </div>
-          </div>
-
-          {/* Grid */}
-          {results.length > 0 ? (
-            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {results.map((p, i) => (
-                <ProductCard key={p.slug} product={p} priority={i < 3} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-6 rounded-3xl border border-dashed border-cream-400 bg-cream-100 p-12 text-center">
-              <p className="font-display text-2xl text-ink-900">Chưa có sản phẩm phù hợp</p>
-              <p className="mt-2 text-sm text-ink-500">Thử nới khoảng giá hoặc chọn chất liệu khác.</p>
-              <Button variant="outline" size="sm" className="mt-6" onClick={clearAll}>Xoá bộ lọc</Button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile drawer */}
-      <div className={cn("fixed inset-0 z-[60] lg:hidden", drawer ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!drawer}>
-        <div onClick={() => setDrawer(false)} className={cn("absolute inset-0 bg-ink-900/50 transition-opacity duration-300", drawer ? "opacity-100" : "opacity-0")} />
-        <div className={cn("absolute inset-y-0 right-0 w-[85%] max-w-sm overflow-y-auto bg-cream-50 p-6 shadow-2xl transition-transform duration-400 ease-out-expo", drawer ? "translate-x-0" : "translate-x-full")}>
-          <div className="mb-6 flex items-center justify-between">
-            <p className="font-display text-xl font-semibold">Bộ lọc</p>
-            <button type="button" onClick={() => setDrawer(false)} className="grid size-9 place-items-center rounded-full hover:bg-cream-200" aria-label="Đóng">
-              <X className="size-5" />
-            </button>
-          </div>
-          {sidebar}
-          <Button className="mt-8 w-full" onClick={() => setDrawer(false)}>Xem {results.length} sản phẩm</Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Tab({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "h-11 shrink-0 rounded-full px-6 text-sm font-semibold transition-all duration-300",
-        active ? "bg-crimson-700 text-cream-50 shadow-[0_8px_20px_-10px_rgb(136_25_23/0.7)]" : "bg-white text-ink-700 ring-1 ring-cream-300 hover:ring-gold-400",
-      )}
-    >
-      {label}
-    </button>
-  );
-}
-
-function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-gold-600">{title}</h3>
-      <ul className="mt-3 space-y-1">{children}</ul>
-    </div>
-  );
-}
-
-function Option({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={onClick}
-        className={cn(
-          "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
-          active ? "bg-crimson-50 font-semibold text-crimson-700" : "text-ink-700 hover:bg-cream-200",
+      {/* Active chips */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-cream-300 pt-4">
+        <p className="text-sm text-ink-500">
+          <span className="font-bold text-navy-900">{results.length}</span> set quà
+          {f.q && <> cho từ khoá “<span className="font-semibold text-navy-900">{f.q}</span>”</>}
+          {tagInfo && <> · <span className="font-semibold text-ruby-700">{tagInfo.label}</span></>}
+        </p>
+        {activeCount > 0 && (
+          <button type="button" onClick={() => update({ nhom: null, "chat-lieu": null, gia: null, tag: null, q: null })} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ruby-700 hover:underline">
+            <X className="size-4" /> Xoá bộ lọc ({activeCount})
+          </button>
         )}
-      >
-        <span className={cn("grid size-4 place-items-center rounded-[5px] border transition-colors", active ? "border-crimson-700 bg-crimson-700 text-white" : "border-ink-200 bg-white")}>
-          {active && <Check className="size-3" strokeWidth={3} />}
-        </span>
-        {label}
-      </button>
-    </li>
+      </div>
+
+      {/* Grid: 2 cột desktop, 1 cột mobile */}
+      {results.length > 0 ? (
+        <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+          {results.map((p, i) => <CatalogueItem key={p.slug} product={p} priority={i < 2} />)}
+        </div>
+      ) : (
+        <div className="mt-6 rounded-3xl border border-dashed border-cream-400 bg-cream-50 p-12 text-center">
+          <p className="font-display text-2xl text-navy-900">Chưa có set quà phù hợp</p>
+          <p className="mt-2 text-sm text-ink-500">Thử nới khoảng giá, chọn chất liệu khác hoặc liên hệ để được thiết kế riêng.</p>
+          <div className="mt-6 flex justify-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => update({ nhom: null, "chat-lieu": null, gia: null, tag: null, q: null })}>Xoá bộ lọc</Button>
+            <Button variant="gold" size="sm" href="/lien-he">Nhận tư vấn</Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PillRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
+      <p className="w-36 shrink-0 pt-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{label}</p>
+      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">{children}</div>
+    </div>
+  );
+}
+
+function Pill({ children, active, onClick, tone = "grey" }: { children: React.ReactNode; active: boolean; onClick: () => void; tone?: "gold" | "grey" | "navy" }) {
+  const styles = {
+    gold: active ? "bg-gold-gradient text-navy-900 shadow-gold" : "bg-gold-100 text-gold-800 ring-1 ring-gold-300 hover:bg-gold-200",
+    grey: active ? "bg-navy-900 text-cream-50" : "bg-cream-200 text-ink-700 hover:bg-cream-300",
+    navy: active ? "bg-ruby-700 text-cream-50" : "bg-cream-200 text-ink-700 hover:bg-cream-300",
+  }[tone];
+  return (
+    <button type="button" onClick={onClick} aria-pressed={active} className={cn("h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-all duration-300", styles)}>
+      {children}
+    </button>
   );
 }

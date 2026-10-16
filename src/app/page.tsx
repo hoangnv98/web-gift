@@ -1,15 +1,17 @@
-import { Hero } from "@/components/home/hero";
-import { CategoryShowcase, FeaturedProducts, WhyUs, Process, ContactCTA } from "@/components/home/sections";
+import { HeroSlider } from "@/components/home/hero-slider";
+import { GoldenCommitments, AboutBlock, BudgetFilter, Shelves, CoreValues, PartnerLogos, BrandStory } from "@/components/home/sections";
 
 export default function HomePage() {
   return (
     <>
-      <Hero />
-      <CategoryShowcase />
-      <FeaturedProducts />
-      <WhyUs />
-      <Process />
-      <ContactCTA />
+      <HeroSlider />
+      <GoldenCommitments />
+      <AboutBlock />
+      <BudgetFilter />
+      <Shelves />
+      <CoreValues />
+      <PartnerLogos />
+      <BrandStory />
     </>
   );
 }
