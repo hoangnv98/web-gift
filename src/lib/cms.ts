@@ -1,3 +1,4 @@
+import { COMPANY } from "./company";
 import { cacheLife, cacheTag } from "next/cache";
 import type {
   B2BSetting,
@@ -96,7 +97,7 @@ export interface Settings {
   zalo: string;
   email: string;
   hours: string;
-  company: { legalName: string; address: string; representative: string; phone: string; taxCode: string };
+  company: { legalName: string; address: string; representative: string; phone: string; taxCode: string; bank: { account: string; name: string } };
   bctUrl?: string;
   bctBadge?: ImageRef;
   dmcaUrl?: string;
@@ -289,7 +290,8 @@ export async function getSettings(): Promise<Settings> {
   cacheTag("settings");
   cacheLife("weeks");
   const s = await cmsFetch<SiteSetting>("globals/site-settings", { depth: 1 });
-  const tel = s.hotlineTel || s.hotline.replace(/[^\d+]/g, "");
+  const hotline = s.hotline || COMPANY.hotline;
+  const tel = s.hotlineTel || hotline.replace(/[^\d+]/g, "") || COMPANY.hotlineTel;
   return {
     name: s.name,
     shortName: s.shortName || s.name,
@@ -297,12 +299,13 @@ export async function getSettings(): Promise<Settings> {
     tagline: s.tagline ?? "",
     season: s.season ?? "",
     description: s.description ?? "",
-    hotline: s.hotline,
+    hotline,
     hotlineHref: `tel:${tel}`,
-    zalo: s.zalo ?? "",
+    zalo: s.zalo || COMPANY.zalo,
     email: s.email ?? "",
     hours: s.hours ?? "",
-    company: { legalName: s.legalName ?? s.name, address: s.address ?? "", representative: s.representative ?? "", phone: s.hotline, taxCode: s.taxCode ?? "" },
+    // Thông tin pháp nhân lấy từ src/lib/company.ts để đảm bảo ghi chuẩn từng chữ.
+    company: { legalName: COMPANY.legalName, address: COMPANY.address, representative: s.representative ?? "", phone: hotline, taxCode: COMPANY.taxCode, bank: COMPANY.bank },
     bctUrl: s.bctUrl ?? undefined,
     bctBadge: toImage(s.bctBadge),
     dmcaUrl: s.dmcaUrl ?? undefined,
