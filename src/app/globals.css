@@ -7,6 +7,9 @@
 @theme {
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+  /* Trang catalogue (theo mẫu in): SVN-Poppins + Bodoni Moda, nạp bằng next/font/local trong src/lib/catalogue-fonts.ts */
+  --font-cat-sans: var(--font-poppins), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-cat-serif: var(--font-bodoni), "Bodoni 72", Didot, Georgia, serif;
 
   --color-navy-50: #eef2f8;
   --color-navy-100: #d9e1ee;
@@ -42,6 +45,16 @@
   --color-ruby-700: #9b1b1e;
   --color-ruby-800: #7a1416;
   --color-ruby-900: #560d0f;
+
+  /* Vàng nhãn + đỏ catalogue (theo mẫu in) */
+  --color-sun-400: #f9c66e;
+  --color-sun-500: #f7b64b;
+  --color-sun-600: #e9a22f;
+  --color-tet-50: #fbf7f1;
+  --color-tet-100: #f3ecdf;
+  --color-tet-200: #e6dccd;
+  --color-tet-red: #c6221d;
+  --color-tet-red-dark: #a3150f;
 
   --color-ink-950: #0f0d0c;
   --color-ink-900: #1a1715;

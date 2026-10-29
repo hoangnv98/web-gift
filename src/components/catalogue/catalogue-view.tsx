@@ -92,26 +92,26 @@ export function CatalogueView({ products, categories, materials, tags, brand }: 
         ))}
       </PillRow>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-cream-300 pt-4">
-        <p className="text-sm text-ink-500">
-          <span className="font-bold text-navy-900">{results.length}</span> set quà
-          {f.q && <> cho từ khoá “<span className="font-semibold text-navy-900">{f.q}</span>”</>}
-          {tagInfo && <> · <span className="font-semibold text-ruby-700">{tagInfo.label}</span></>}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-tet-200 pt-4">
+        <p className="text-sm font-medium text-ink-500">
+          <span className="font-bold text-tet-red">{results.length}</span> set quà
+          {f.q && <> cho từ khoá “<span className="font-bold text-ink-900">{f.q}</span>”</>}
+          {tagInfo && <> · <span className="font-bold text-tet-red">{tagInfo.label}</span></>}
         </p>
         {activeCount > 0 && (
-          <button type="button" onClick={clear} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ruby-700 hover:underline">
+          <button type="button" onClick={clear} className="inline-flex items-center gap-1.5 text-sm font-bold text-tet-red hover:underline">
             <X className="size-4" /> Xoá bộ lọc ({activeCount})
           </button>
         )}
       </div>
 
       {results.length > 0 ? (
-        <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-          {results.map((p, i) => <CatalogueItem key={p.slug} product={p} priority={i < 2} />)}
+        <div className="mt-6 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-2 lg:gap-6">
+          {results.map((p, i) => <CatalogueItem key={p.slug} product={p} priority={i < 2} brand={brand} />)}
         </div>
       ) : (
-        <div className="mt-6 rounded-3xl border border-dashed border-cream-400 bg-cream-50 p-12 text-center">
-          <p className="font-display text-2xl text-navy-900">Chưa có set quà phù hợp</p>
+        <div className="mt-6 rounded-3xl border border-dashed border-tet-200 bg-white p-12 text-center">
+          <p className="font-cat-serif text-2xl uppercase tracking-wide text-tet-red">Chưa có set quà phù hợp</p>
           <p className="mt-2 text-sm text-ink-500">Thử nới khoảng giá, chọn chất liệu khác hoặc liên hệ để được thiết kế riêng.</p>
           <div className="mt-6 flex justify-center gap-3">
             <Button variant="outline" size="sm" onClick={clear}>Xoá bộ lọc</Button>
@@ -126,7 +126,7 @@ export function CatalogueView({ products, categories, materials, tags, brand }: 
 function PillRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
-      <p className="w-36 shrink-0 pt-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-400">{label}</p>
+      <p className="w-36 shrink-0 pt-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-400">{label}</p>
       <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">{children}</div>
     </div>
   );
@@ -134,12 +134,12 @@ function PillRow({ label, children }: { label: string; children: React.ReactNode
 
 function Pill({ children, active, onClick, tone = "grey" }: { children: React.ReactNode; active: boolean; onClick: () => void; tone?: "gold" | "grey" | "navy" }) {
   const styles = {
-    gold: active ? "bg-gold-gradient text-navy-900 shadow-gold" : "bg-gold-100 text-gold-800 ring-1 ring-gold-300 hover:bg-gold-200",
-    grey: active ? "bg-navy-900 text-cream-50" : "bg-cream-200 text-ink-700 hover:bg-cream-300",
-    navy: active ? "bg-ruby-700 text-cream-50" : "bg-cream-200 text-ink-700 hover:bg-cream-300",
+    gold: active ? "bg-sun-500 text-white shadow-sm" : "bg-white text-ink-700 ring-1 ring-tet-200 hover:bg-tet-100",
+    grey: active ? "bg-ink-900 text-cream-50" : "bg-white text-ink-700 ring-1 ring-tet-200 hover:bg-tet-100",
+    navy: active ? "bg-tet-red text-white" : "bg-white text-ink-700 ring-1 ring-tet-200 hover:bg-tet-100",
   }[tone];
   return (
-    <button type="button" onClick={onClick} aria-pressed={active} className={cn("h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold transition-all duration-300", styles)}>
+    <button type="button" onClick={onClick} aria-pressed={active} className={cn("h-10 shrink-0 rounded-full px-4 text-[13px] font-bold transition-all duration-300", styles)}>
       {children}
     </button>
   );
