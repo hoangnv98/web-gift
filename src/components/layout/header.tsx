@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ChevronDown, Heart, LayoutGrid, Menu, Phone, ShoppingBag, X } from "lucide-react";
+import { BookOpen, ChevronDown, Heart, LayoutGrid, Menu, Phone, Search, ShoppingBag, X } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import type { Navigation, Settings } from "@/lib/cms";
 import type { ProductLite } from "@/lib/catalogue";
@@ -11,6 +11,7 @@ import { useStore } from "@/lib/store";
 import { Logo } from "@/components/ui/logo";
 import { Container } from "@/components/ui/container";
 import { SearchBox } from "./search-box";
+import { SearchOverlay } from "./search-overlay";
 
 export interface HeaderProps {
   settings: Pick<Settings, "name" | "slogan" | "tagline" | "hotline" | "hotlineHref">;
@@ -23,6 +24,7 @@ export function Header({ settings: site, navigation, products }: HeaderProps) {
   // Menu "mở" chỉ với pathname lúc mở -> điều hướng sẽ tự đóng, không cần effect.
   const [openPath, setOpenPath] = useState<string | null>(null);
   const [catPath, setCatPath] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const mobileOpen = openPath === pathname;
   const catOpen = catPath === pathname;
   const { cart, wishlist } = useStore();
@@ -54,6 +56,9 @@ export function Header({ settings: site, navigation, products }: HeaderProps) {
           <Logo tone="dark" name={site.name} tagline={site.tagline} className="min-w-0" />
           <SearchBox products={products} className="hidden flex-1 md:block lg:mx-6" />
           <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2">
+            <button type="button" onClick={() => setSearchOpen(true)} className="grid size-11 place-items-center rounded-full hover:bg-white/10 md:hidden" aria-label="Tìm kiếm" aria-haspopup="dialog" aria-expanded={searchOpen}>
+              <Search className="size-5" />
+            </button>
             <Link href="/yeu-thich" className="relative grid size-11 place-items-center rounded-full hover:bg-white/10" aria-label="Sản phẩm yêu thích">
               <Heart className="size-5" />
               {wishlist.length > 0 && <Count n={wishlist.length} />}
@@ -72,9 +77,6 @@ export function Header({ settings: site, navigation, products }: HeaderProps) {
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
           </div>
-        </Container>
-        <Container className="pb-3 md:hidden">
-          <SearchBox products={products} />
         </Container>
       </div>
 
@@ -142,6 +144,8 @@ export function Header({ settings: site, navigation, products }: HeaderProps) {
           </Container>
         </div>
       </div>
+
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} products={products} navigation={navigation} />
     </header>
   );
 }
