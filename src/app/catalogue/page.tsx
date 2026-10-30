@@ -21,7 +21,7 @@ export default async function CataloguePage() {
       <section className="border-b border-tet-200">
         <Container className="max-w-[1680px] py-10 lg:py-14">
           <span className="inline-block rounded-sm bg-sun-500 px-3 py-1.5 text-[11px] font-bold uppercase leading-none tracking-[0.08em] text-white">Web catalogue · {site.season}</span>
-          <h1 className="mt-4 text-balance font-cat-serif text-4xl font-[450] uppercase leading-[1.05] tracking-[0.04em] text-tet-red sm:text-5xl" style={{ fontVariationSettings: '"opsz" 96' }}>
+          <h1 className="mt-4 break-words text-balance font-cat-serif text-[2rem] font-[450] min-[420px]:text-4xl uppercase leading-[1.05] tracking-[0.04em] text-tet-red sm:text-5xl" style={{ fontVariationSettings: '"opsz" 96' }}>
             Catalogue quà tặng
           </h1>
           <p className="mt-4 max-w-2xl text-pretty text-[15px] font-medium leading-relaxed text-ink-500">

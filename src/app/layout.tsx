@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: CLARITY_SNIPPET }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS_JSON_LD) }} />
       </head>
-      <body suppressHydrationWarning className="flex min-h-full flex-col">
+      <body suppressHydrationWarning className="flex min-h-full flex-col overflow-x-clip">
         <Header settings={{ name: site.name, slogan: site.slogan, tagline: site.tagline, hotline: site.hotline, hotlineHref: site.hotlineHref }} navigation={navigation} products={products.map(toLite)} />
         <main className="flex-1">{children}</main>
         <Footer />

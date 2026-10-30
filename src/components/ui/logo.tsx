@@ -26,7 +26,7 @@ export function Logo({ className, tone = "dark", compact = false, name = "T&Q GI
       {!compact && (
         <span className="flex flex-col leading-none">
           <span className={cn("font-display text-[1.35rem] font-bold tracking-tight", tone === "dark" ? "text-cream-50" : "text-navy-900")}>{name}</span>
-          <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.22em] text-gold-400">{tagline}</span>
+          <span className="mt-1 hidden text-[10px] font-medium uppercase tracking-[0.22em] text-gold-400 min-[420px]:block">{tagline}</span>
         </span>
       )}
     </Link>

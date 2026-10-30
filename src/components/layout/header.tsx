@@ -50,10 +50,10 @@ export function Header({ settings: site, navigation, products }: HeaderProps) {
 
       {/* Main header */}
       <div className="bg-navy-900 text-cream-50">
-        <Container className="flex h-[76px] items-center gap-4 lg:gap-8">
-          <Logo tone="dark" name={site.name} tagline={site.tagline} />
+        <Container className="flex h-[76px] items-center gap-3 sm:gap-4 lg:gap-8">
+          <Logo tone="dark" name={site.name} tagline={site.tagline} className="min-w-0" />
           <SearchBox products={products} className="hidden flex-1 md:block lg:mx-6" />
-          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2">
             <Link href="/yeu-thich" className="relative grid size-11 place-items-center rounded-full hover:bg-white/10" aria-label="Sản phẩm yêu thích">
               <Heart className="size-5" />
               {wishlist.length > 0 && <Count n={wishlist.length} />}
