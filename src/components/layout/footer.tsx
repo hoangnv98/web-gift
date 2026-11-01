@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, MapPin, Phone, Clock, ShieldCheck, BadgeCheck, Landmark, MessageCircle, FileText } from "lucide-react";
+import { Mail, MapPin, Phone, Clock, ShieldCheck, BadgeCheck, Landmark, MessageCircle, FileText, Star } from "lucide-react";
 import { getNavigation, getPolicies, getSettings } from "@/lib/cms";
 import { COMPANY, REQUIRED_POLICIES } from "@/lib/company";
 import { Container } from "@/components/ui/container";
@@ -71,6 +71,9 @@ export async function Footer() {
               referrerPolicy="strict-origin-when-cross-origin"
             />
           </div>
+          <Link href="/danh-gia" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-gold-300 hover:text-gold-200">
+            <Star className="size-4 fill-current" /> Đánh giá chúng tôi trên Google Maps
+          </Link>
 
           <h3 className="mt-8 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-gold-400">Chứng nhận</h3>
           <div className="mt-5 flex flex-wrap gap-3">

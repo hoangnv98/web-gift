@@ -3,7 +3,7 @@ import { getPolicies, getPosts, getProducts, siteUrl } from "@/lib/cms";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, posts, policies] = await Promise.all([getProducts(), getPosts(), getPolicies()]);
-  const statics = ["", "/catalogue", "/qua-tet", "/qua-doanh-nghiep", "/qua-trung-thu", "/gioi-thieu", "/blog", "/lien-he"];
+  const statics = ["", "/catalogue", "/qua-tet", "/qua-doanh-nghiep", "/qua-trung-thu", "/gioi-thieu", "/blog", "/lien-he", "/danh-gia"];
   return [
     ...statics.map((p) => ({ url: `${siteUrl}${p}`, changeFrequency: "weekly" as const, priority: p === "" ? 1 : 0.8 })),
     ...products.map((p) => ({ url: `${siteUrl}/catalogue/${p.slug}`, changeFrequency: "weekly" as const, priority: 0.7 })),

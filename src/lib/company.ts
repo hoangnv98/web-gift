@@ -14,6 +14,12 @@ export const COMPANY = {
   /** Google Maps embed (Chia sẻ → Nhúng bản đồ) – điểm "T&Q Gift Viet Nam". */
   mapEmbedUrl:
     "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3722.5407815077324!2d105.9667463!3d21.090995799999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x313507e9b7d5f0af%3A0xd5c07bccc8494baf!2sT%26Q%20Gift%20Viet%20Nam!5e0!3m2!1sen!2s!4v1793298469084!5m2!1sen!2s",
+  /**
+   * Link đánh giá Google Maps. Mặc định mở trang địa điểm theo CID (khách bấm "Viết bài đánh giá").
+   * Nếu có link "Nhận thêm bài đánh giá" từ Google Business Profile (dạng https://g.page/r/XXXX/review)
+   * thì thay vào đây để mở thẳng khung viết đánh giá.
+   */
+  reviewUrl: "https://www.google.com/maps?cid=15402446845070887855",
 } as const;
 
 /** 4 trang chính sách bắt buộc có link ở footer (slug trùng với CMS). */
