@@ -5,11 +5,11 @@
    navy (chủ đạo) · gold (nhấn kim loại) · cream (nền) · ruby (lễ hội) · ink
 --------------------------------------------------------------------------- */
 @theme {
+  /* Toàn site dùng Be Vietnam Pro (giống mincygroup.com), nạp bằng next/font/google trong src/app/layout.tsx */
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
-  /* Trang catalogue (theo mẫu in): SVN-Poppins + Bodoni Moda, nạp bằng next/font/local trong src/lib/catalogue-fonts.ts */
-  --font-cat-sans: var(--font-poppins), var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-cat-serif: var(--font-bodoni), "Bodoni 72", Didot, Georgia, serif;
+  --font-display: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-cat-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-cat-serif: var(--font-body), ui-sans-serif, system-ui, sans-serif;
 
   --color-navy-50: #eef2f8;
   --color-navy-100: #d9e1ee;

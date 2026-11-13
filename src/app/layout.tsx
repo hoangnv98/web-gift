@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
+import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
-import { getNavigation, getProducts, getSeo, getSettings, siteUrl } from "@/lib/cms";
+import { getCategories, getMaterials, getNavigation, getProducts, getSeo, getSettings, siteUrl } from "@/lib/cms";
 import { toLite } from "@/lib/catalogue";
+import { buildProductMenu } from "@/lib/product-menu";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { FloatingButtons } from "@/components/layout/floating-buttons";
 
-const body = Plus_Jakarta_Sans({ variable: "--font-body", subsets: ["latin", "vietnamese"], weight: ["400", "500", "600", "700", "800"], display: "swap" });
-const display = Playfair_Display({ variable: "--font-display", subsets: ["latin", "vietnamese"], weight: ["400", "500", "600", "700", "800"], style: ["normal", "italic"], display: "swap" });
+// Font toàn site giống mincygroup.com: Be Vietnam Pro cho cả tiêu đề lẫn nội dung (tiêu đề dùng nét mảnh).
+const beVietnam = Be_Vietnam_Pro({ variable: "--font-body", subsets: ["latin", "vietnamese"], weight: ["300", "400", "500", "600", "700"], display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
   const [site, seo] = await Promise.all([getSettings(), getSeo()]);
@@ -38,7 +39,7 @@ const LOCAL_BUSINESS_JSON_LD = {
   name: "CÔNG TY TNHH T&Q GIFT VIỆT NAM",
   alternateName: "T&Q Gift - Quà Tặng Doanh Nghiệp Bắc Ninh",
   url: "https://www.tqgift.vn",
-  logo: "https://www.tqgift.vn/logo.png",
+  logo: "https://www.tqgift.vn/logo.png", // public/logo.png
   image: "https://www.tqgift.vn/og-image.jpg",
   description:
     "Chuyên sản xuất, thiết kế và cung cấp giải pháp Quà tặng Doanh nghiệp, Quà tặng Sự kiện, Hội nghị, Công đoàn và Hộp quà Tết B2B cao cấp tại Bắc Ninh.",
@@ -57,17 +58,18 @@ const LOCAL_BUSINESS_JSON_LD = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [site, navigation, products, seo] = await Promise.all([getSettings(), getNavigation(), getProducts(), getSeo()]);
+  const [site, navigation, products, seo, categories, materials] = await Promise.all([getSettings(), getNavigation(), getProducts(), getSeo(), getCategories(), getMaterials()]);
+  const productMenu = buildProductMenu({ navigation, products, categories, materials });
   // suppressHydrationWarning trên <html>/<body>: extension trình duyệt (Grammarly, ColorZilla, trình dịch…)
   // hay chèn thuộc tính vào hai thẻ này trước khi React hydrate, gây cảnh báo hydration giả.
   return (
-    <html lang="vi" suppressHydrationWarning className={`${body.variable} ${display.variable} h-full antialiased`}>
+    <html lang="vi" suppressHydrationWarning className={`${beVietnam.variable} h-full antialiased`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: CLARITY_SNIPPET }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS_JSON_LD) }} />
       </head>
       <body suppressHydrationWarning className="flex min-h-full flex-col overflow-x-clip">
-        <Header settings={{ name: site.name, slogan: site.slogan, tagline: site.tagline, hotline: site.hotline, hotlineHref: site.hotlineHref }} navigation={navigation} products={products.map(toLite)} />
+        <Header settings={{ name: site.name, slogan: site.slogan, tagline: site.tagline, hotline: site.hotline, hotlineHref: site.hotlineHref }} navigation={navigation} products={products.map(toLite)} productMenu={productMenu} />
         <main className="flex-1">{children}</main>
         <Footer />
         <FloatingButtons />

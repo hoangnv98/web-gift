@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
-import { FileText, PenTool, Stamp, Zap, ClipboardCheck, PackageCheck, Truck, Receipt, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, FileBadge2, FileText, PenTool, Stamp, Zap, ClipboardCheck, PackageCheck, Truck, Receipt, Sparkles } from "lucide-react";
 import { getB2B, getProducts } from "@/lib/cms";
 import { getFeatured } from "@/lib/catalogue";
 import { Container } from "@/components/ui/container";
@@ -24,7 +25,7 @@ export default async function B2BPage() {
       <GoldenCommitments />
 
       {b2b.discounts.length > 0 && (
-        <section className="py-20">
+        <section id="chiet-khau" className="scroll-mt-32 py-20">
           <Container>
             <SectionHeading eyebrow="Chính sách chiết khấu" title="Càng nhiều, càng ưu đãi" description="Áp dụng trên giá niêm yết chưa VAT. Mức chiết khấu chính thức theo báo giá từng đơn." />
             <div className="mt-10 overflow-hidden rounded-3xl bg-white shadow-card ring-1 ring-navy-900/5">
@@ -52,7 +53,7 @@ export default async function B2BPage() {
       )}
 
       {b2b.services.length > 0 && (
-        <section className="bg-cream-100 py-20">
+        <section id="dich-vu" className="scroll-mt-32 bg-cream-100 py-20">
           <Container>
             <SectionHeading eyebrow="Cá nhân hoá thương hiệu" title="In · Ép kim · Khắc laser logo doanh nghiệp" />
             <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -77,7 +78,7 @@ export default async function B2BPage() {
       )}
 
       {b2b.steps.length > 0 && (
-        <section className="bg-navy-silk py-20 text-cream-50">
+        <section id="quy-trinh" className="scroll-mt-32 bg-navy-silk py-20 text-cream-50">
           <Container>
             <SectionHeading tone="dark" eyebrow="Quy trình" title={`${b2b.steps.length} bước đặt hàng B2B & xuất hoá đơn GTGT`} />
             <ol className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-5">
@@ -102,6 +103,11 @@ export default async function B2BPage() {
         <Container className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <SectionHeading align="left" eyebrow="Báo giá sỉ" title="Gửi yêu cầu, nhận đề xuất trong 24 giờ" description="Đội ngũ tư vấn nhận thông báo ngay qua Zalo / Email và liên hệ lại với bạn." />
+            <Link href="/ho-so-nang-luc" className="group mt-6 flex items-center gap-4 rounded-2xl border border-gold-500/40 bg-cream-50 p-4 transition-colors hover:border-gold-500">
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-navy-900 text-gold-300"><FileBadge2 className="size-5" /></span>
+              <span className="flex-1 text-sm leading-snug text-ink-700"><strong className="block font-semibold text-navy-900">Cần hồ sơ năng lực để đăng ký nhà cung cấp?</strong>Thông tin pháp lý, chứng từ, chính sách chiết khấu cho Purchasing / HR.</span>
+              <ArrowRight className="size-4 text-gold-700 transition-transform group-hover:translate-x-0.5" />
+            </Link>
             <div className="mt-8 grid grid-cols-2 gap-4">
               {getFeatured(products, 2).map((p) => <ProductCard key={p.slug} product={p} />)}
             </div>

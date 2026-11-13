@@ -55,7 +55,7 @@ export function CatalogueItem({ product, priority = false, brand }: { product: P
       <div className="mt-5 grid gap-x-8 gap-y-5 @3xl:grid-cols-[17rem_minmax(0,1fr)_minmax(0,1fr)]">
         <div>
           <span className="inline-block rounded-sm bg-sun-500 px-3 py-1.5 text-[11px] font-bold uppercase leading-none tracking-[0.08em] text-white">{catalogueLabel(product)}</span>
-          <h2 className={cn(name.length > 18 ? "text-[1.6rem]" : "text-[1.9rem]", "mt-3 min-h-[4rem] font-cat-serif font-[450] uppercase leading-[1.05] tracking-[0.05em] text-tet-red")} style={{ fontVariationSettings: '"opsz" 96' }}>
+          <h2 className={cn(name.length > 18 ? "text-[1.4rem]" : "text-[1.65rem]", "mt-3 min-h-[4rem] font-cat-serif font-normal uppercase leading-[1.05] tracking-[0.05em] text-tet-red")} style={{ fontVariationSettings: '"opsz" 96' }}>
             <Link href={`/catalogue/${product.slug}`} className="hover:text-tet-red-dark">{name}</Link>
           </h2>
           <div className="mt-3 flex items-end justify-between gap-3 border-t border-tet-200 pt-3">

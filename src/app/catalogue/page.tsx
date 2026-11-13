@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { CatalogueView } from "@/components/catalogue/catalogue-view";
 import { getCategories, getMaterials, getProducts, getSettings, getTags } from "@/lib/cms";
-import { catalogueFontsClassName } from "@/lib/catalogue-fonts";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSettings();
@@ -17,11 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function CataloguePage() {
   const [site, products, categories, materials, tags] = await Promise.all([getSettings(), getProducts(), getCategories(), getMaterials(), getTags()]);
   return (
-    <div className={`${catalogueFontsClassName} bg-tet-50 font-cat-sans text-ink-900`}>
+    <div className="bg-tet-50 font-cat-sans text-ink-900">
       <section className="border-b border-tet-200">
         <Container className="max-w-[1680px] py-10 lg:py-14">
           <span className="inline-block rounded-sm bg-sun-500 px-3 py-1.5 text-[11px] font-bold uppercase leading-none tracking-[0.08em] text-white">Web catalogue · {site.season}</span>
-          <h1 className="mt-4 break-words text-balance font-cat-serif text-[2rem] font-[450] min-[420px]:text-4xl uppercase leading-[1.05] tracking-[0.04em] text-tet-red sm:text-5xl" style={{ fontVariationSettings: '"opsz" 96' }}>
+          <h1 className="mt-4 break-words text-balance font-cat-serif text-[2rem] font-normal min-[420px]:text-4xl uppercase leading-[1.05] tracking-[0.04em] text-tet-red sm:text-5xl">
             Catalogue quà tặng
           </h1>
           <p className="mt-4 max-w-2xl text-pretty text-[15px] font-medium leading-relaxed text-ink-500">

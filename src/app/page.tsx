@@ -1,6 +1,6 @@
 import { getHomePage } from "@/lib/cms";
 import { HeroSlider } from "@/components/home/hero-slider";
-import { GoldenCommitments, AboutBlock, BudgetFilter, Shelves, CoreValues, PartnerLogos, BrandStory, LatestPosts } from "@/components/home/sections";
+import { GoldenCommitments, AboutBlock, BudgetFilter, Shelves, CoreValues, PartnerLogos, LatestPosts } from "@/components/home/sections";
 
 export default async function HomePage() {
   const home = await getHomePage();
@@ -15,7 +15,6 @@ export default async function HomePage() {
       {s.coreValues && <CoreValues />}
       <PartnerLogos />
       {s.blog && <LatestPosts />}
-      {s.brandStory && <BrandStory />}
     </>
   );
 }

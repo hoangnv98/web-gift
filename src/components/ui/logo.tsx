@@ -1,34 +1,18 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import logoGold from "@/assets/brand/logo-ngang-vang.png";
+import logoMaroon from "@/assets/brand/logo-ngang-do.png";
 
-/** Logo tròn T&Q GIFT – nền navy, chữ vàng kim. Thay bằng file logo thật khi có. */
-export function LogoMark({ className }: { className?: string }) {
+/**
+ * Logo ngang T&Q GIFT (biểu tượng + chữ + slogan "Trao chữ Tâm – Gửi quà Quý").
+ * tone="dark": nền tối (header, footer navy) → bản vàng kim; tone="light": nền sáng → bản đỏ đô.
+ * File gốc: src/assets/brand/ (thêm bản trắng logo-ngang-trang.png), favicon: src/app/icon.png.
+ */
+export function Logo({ className, imageClassName, tone = "dark", name = "T&Q GIFT", preload = false }: { className?: string; imageClassName?: string; tone?: "light" | "dark"; name?: string; preload?: boolean }) {
   return (
-    <span className={cn("relative grid shrink-0 place-items-center rounded-full bg-navy-900 ring-2 ring-gold-500 shadow-[0_6px_18px_-6px_rgb(212_175_55/0.7)]", className)}>
-      <svg viewBox="0 0 64 64" className="size-[86%]" aria-hidden="true">
-        <circle cx="32" cy="32" r="29" fill="none" stroke="url(#g)" strokeWidth="1.2" strokeDasharray="2 3" />
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#c59b27" /><stop offset="0.5" stopColor="#f5e6ad" /><stop offset="1" stopColor="#aa7c11" />
-          </linearGradient>
-        </defs>
-        <text x="32" y="36" textAnchor="middle" fontFamily="Playfair Display, Georgia, serif" fontWeight="700" fontSize="22" fill="url(#g)">T&amp;Q</text>
-        <text x="32" y="49" textAnchor="middle" fontFamily="sans-serif" fontWeight="600" fontSize="7.5" letterSpacing="2" fill="#f5e6ad">GIFT</text>
-      </svg>
-    </span>
-  );
-}
-
-export function Logo({ className, tone = "dark", compact = false, name = "T&Q GIFT", tagline = "Quà tặng doanh nghiệp cao cấp" }: { className?: string; tone?: "light" | "dark"; compact?: boolean; name?: string; tagline?: string }) {
-  return (
-    <Link href="/" className={cn("group inline-flex items-center gap-3", className)} aria-label={name}>
-      <LogoMark className="size-12 transition-transform duration-500 ease-out-expo group-hover:rotate-6" />
-      {!compact && (
-        <span className="flex flex-col leading-none">
-          <span className={cn("font-display text-[1.35rem] font-bold tracking-tight", tone === "dark" ? "text-cream-50" : "text-navy-900")}>{name}</span>
-          <span className="mt-1 hidden text-[10px] font-medium uppercase tracking-[0.22em] text-gold-400 min-[420px]:block">{tagline}</span>
-        </span>
-      )}
+    <Link href="/" className={cn("inline-flex shrink-0 items-center", className)} aria-label={`${name} – Trang chủ`}>
+      <Image src={tone === "dark" ? logoGold : logoMaroon} alt={name} preload={preload} sizes="200px" className={cn("h-12 w-auto sm:h-14", imageClassName)} />
     </Link>
   );
 }

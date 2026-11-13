@@ -20,6 +20,11 @@ export const COMPANY = {
    * thì thay vào đây để mở thẳng khung viết đánh giá.
    */
   reviewUrl: "https://www.google.com/maps?cid=15402446845070887855",
+  /**
+   * File PDF hồ sơ năng lực cho trang /ho-so-nang-luc. Chép file vào public/ (vd. public/ho-so-nang-luc-tqgift.pdf)
+   * rồi điền "/ho-so-nang-luc-tqgift.pdf". Để trống (null): trang hiện nút "Nhận hồ sơ qua Zalo" thay cho nút tải.
+   */
+  capabilityProfilePdf: null as string | null,
 } as const;
 
 /** 4 trang chính sách bắt buộc có link ở footer (slug trùng với CMS). */

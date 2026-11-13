@@ -22,7 +22,7 @@ export async function Footer() {
       <div className="h-1 w-full bg-gold-gradient" />
       <Container className="grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <Logo tone="dark" name={site.name} tagline={site.tagline} />
+          <Logo tone="dark" name={site.name} imageClassName="h-16 sm:h-20" />
           <p className="mt-5 text-sm font-semibold text-gold-300">{company.legalName}</p>
           <dl className="mt-4 space-y-3 text-sm text-cream-200/80">
             <InfoRow icon={FileText} label="Mã số thuế">{company.taxCode}</InfoRow>

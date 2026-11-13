@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Shelf, BrandStory, BudgetFilter } from "@/components/home/sections";
+import { Shelf, BudgetFilter } from "@/components/home/sections";
 import { getCategories, getProducts, getSettings } from "@/lib/cms";
 import { byCategory, byTag } from "@/lib/catalogue";
 import { PageHero } from "@/components/ui/page-hero";
@@ -21,7 +21,6 @@ export default async function TetPage() {
       {hop && <Shelf eyebrow="Hộp quà" title="Hộp Quà Tết Cao Cấp" href="/catalogue?nhom=hop-qua-tet" products={byCategory(products, hop)} />}
       {gio && <Shelf eyebrow="Giỏ quà" title="Giỏ Quà Tết" href="/catalogue?nhom=gio-qua-tet" products={byCategory(products, gio)} className="bg-cream-100" />}
       <Shelf eyebrow="18+" title="Set quà có rượu vang nhập khẩu" href="/catalogue?tag=ruou-vang" products={byTag(products, "ruou-vang")} />
-      <BrandStory compact />
     </>
   );
 }

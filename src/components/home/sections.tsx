@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgePercent, FileCheck2, Heart, Printer, Sparkles, Truck, Handshake, Gem, ShieldCheck } from "lucide-react";
+import { ArrowRight, BadgePercent, FileCheck2, Heart, Printer, Truck, Handshake, Gem, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { unsplash, img } from "@/lib/images";
-import { getHomePage, getPosts, getProducts, getSettings, type LogoBlock, type Product } from "@/lib/cms";
+import { getHomePage, getPosts, getProducts, type LogoBlock, type Product } from "@/lib/cms";
 import { byCategory, priceTiers } from "@/lib/catalogue";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/catalogue/product-card";
 
 /* ---------------------- Section 1b – 4 Cam kết vàng --------------------- */
-const usps = [
+export const commitments = [
   { icon: Printer, title: "Miễn phí in logo doanh nghiệp", text: "Thiệp, tem, ép kim hoặc khắc laser theo nhận diện thương hiệu." },
   { icon: BadgePercent, title: "Chiết khấu B2B hấp dẫn", text: "Ưu đãi theo mốc 10 / 30 / 50 / 100+ phần quà." },
   { icon: FileCheck2, title: "Đầy đủ hoá đơn VAT & hồ sơ công bố", text: "Hoá đơn GTGT, hồ sơ công bố sản phẩm, chứng nhận xuất xứ." },
@@ -23,7 +23,7 @@ export function GoldenCommitments() {
     <section className="relative z-10 -mt-8">
       <Container>
         <ul className="grid gap-4 rounded-3xl bg-white p-4 shadow-card-hover ring-1 ring-navy-900/5 sm:grid-cols-2 lg:grid-cols-4 lg:p-5">
-          {usps.map((u) => (
+          {commitments.map((u) => (
             <li key={u.title} className="flex gap-4 rounded-2xl p-3 transition hover:bg-cream-100">
               <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-navy-900 text-gold-300"><u.icon className="size-5" /></span>
               <div>
@@ -46,10 +46,6 @@ export function AboutBlock() {
         <div className="relative lg:col-span-5">
           <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-card ring-1 ring-navy-900/5">
             <Image src={unsplash(img.handingGift, 900, 1125)} alt="Trao gửi quà tặng T&Q GIFT" fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />
-          </div>
-          <div className="absolute -bottom-6 -right-4 hidden rounded-2xl bg-navy-900 p-5 text-cream-50 shadow-card-hover sm:block">
-            <p className="font-display text-3xl font-bold text-gold-300">T&amp;Q</p>
-            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-cream-200/70">Tâm &amp; Quý</p>
           </div>
         </div>
         <div className="lg:col-span-7">
@@ -113,7 +109,7 @@ export async function Shelves() {
 }
 
 /* ----------------- Section 4 – Hệ giá trị cốt lõi "T & Q" --------------- */
-const values = [
+export const coreValues = [
   { icon: Heart, title: "Tâm & Quý", sub: "Tinh thần chế tác", text: "Lấy chữ Tâm của người làm nghề làm gốc để tuyển chọn và thiết kế nên những món quà Quý xứng tầm đẳng cấp." },
   { icon: Handshake, title: "Tri ân & Quý nhân", sub: "Sứ mệnh kết nối", text: "Là cầu nối văn hóa giúp khách hàng bày tỏ lòng Tri ân chân thành nhất đến những Quý nhân, đối tác và cộng sự trân quý." },
   { icon: Gem, title: "Thịnh vượng & Phú quý", sub: "Thông điệp trao gửi", text: "Mỗi tặng phẩm là một vật phẩm phong thủy may mắn, mang theo lời chúc công danh Thuận lợi, sự nghiệp Thịnh vượng, tài lộc Phú quý." },
@@ -126,7 +122,7 @@ export function CoreValues() {
       <Container>
         <SectionHeading tone="dark" eyebrow="Giá trị cốt lõi" title="Hệ giá trị “T & Q”" description="Bốn trụ cột làm nên mỗi món quà mang tên T&Q GIFT." />
         <ul className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {values.map((v) => (
+          {coreValues.map((v) => (
             <li key={v.title} className="group rounded-3xl border border-gold-500/25 bg-white/[0.04] p-7 transition hover:border-gold-500/60 hover:bg-white/[0.07]">
               <span className="grid size-14 place-items-center rounded-2xl bg-gold-gradient text-navy-900 shadow-gold"><v.icon className="size-6" /></span>
               <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-gold-300">{v.sub}</p>
@@ -215,35 +211,5 @@ export async function LatestPosts({ limit = 3 }: { limit?: number }) {
         </div>
       </Container>
     </section>
-  );
-}
-
-/* --------------- Section 6 – Câu chuyện văn hoá & SEO chân trang --------- */
-export async function BrandStory({ compact = false }: { compact?: boolean }) {
-  const site = await getSettings();
-  return (
-    <section className={cn("bg-cream-lattice", compact ? "py-16" : "py-20 lg:py-28")}>
-      <Container className="max-w-4xl">
-        <SectionHeading eyebrow="Nghệ thuật trao quà" title="NGHỆ THUẬT TRAO QUÀ – NƠI CHỮ “TÂM” GẶP GỠ NGƯỜI “QUÝ”" />
-        <div className="prose-tq mt-10 space-y-5 text-pretty text-[15px] leading-relaxed text-ink-700 sm:text-base">
-          <p>Trong văn hóa của người Việt, tặng quà từ lâu đã vượt qua giá trị vật chất đơn thuần để trở thành một nét đẹp ứng xử đầy tinh tế. Cứ mỗi độ thu sang trăng tròn hay khi tiết trời chuyển mình báo hiệu một mùa Xuân mới sắp gõ cửa, lòng người lại nôn nao chuẩn bị những thức quà tươm tất nhất để biếu tặng người thân, bạn bè và đối tác. Đó là khoảnh khắc ta chậm lại giữa guồng quay công việc, nhìn lại chặng đường đã qua và gửi trao lòng Tri ân sâu sắc đến những vị Quý nhân – những người đã luôn đồng hành, nâng đỡ và sát cánh cùng ta tạo nên thành tựu.</p>
-          <p>Thấu hiểu trọn vẹn tâm ý ấy, <strong className="text-navy-900">T&amp;Q GIFT</strong> ra đời không chỉ để cung cấp những giỏ quà hay hộp quà đơn thuần, mà để cùng bạn kể một câu chuyện trọn vẹn về sự trân trọng:</p>
-          <StoryPoint title="Khởi nguồn từ TÂM & QUÝ">Chúng tôi tin rằng một món quà chỉ thực sự chạm đến trái tim khi được chuẩn bị bằng cái Tâm chân thành và sự thấu hiểu. Từ những hũ yến sào thượng hạng, những chai vang tuyển chọn, trà ngon, bánh quý cho đến từng đường kim mũi chỉ trên hộp da, nét ép kim trên giấy mỹ thuật... tất cả đều được T&amp;Q GIFT chăm chút tỉ mỉ để tạo nên một tặng phẩm Quý giá, nâng tầm vị thế của cả người trao lẫn người nhận.</StoryPoint>
-          <StoryPoint title="Gửi gắm lời chúc THỊNH VƯỢNG – PHÚ QUÝ – THUẬN LỢI">Mỗi hộp quà mở ra là một lời chúc phúc lành cho năm mới, mùa mới. T&amp;Q GIFT gói vào từng sản phẩm ước vọng về một hành trình vạn sự Thuận lợi, luôn có Quý nhân tương trợ, để công việc kinh doanh ngày càng Thịnh vượng và gia đạo ngập tràn Phú quý.</StoryPoint>
-          <StoryPoint title="Vững vàng chuẩn mực TRUST & QUALITY (Niềm tin & Chất lượng)">Đằng sau vẻ ngoài hào hoa như một tác phẩm thời trang là sự cam kết khắt khe về chất lượng. Với khách hàng doanh nghiệp và cá nhân, chữ T&amp;Q chính là bảo chứng cho Trust (Sự tin cậy tuyệt đối về tiến độ, dịch vụ) và Quality (Chất lượng sản phẩm minh bạch, chính hãng, thượng hạng).</StoryPoint>
-          <p>Dù là mùa trăng đoàn viên, dịp Tết sum vầy hay những cột mốc kỷ niệm đáng nhớ trong năm, hãy để T&amp;Q GIFT thay bạn trao đi thành ý – vẹn tròn, sang trọng và đong đầy cảm xúc.</p>
-          <p className="rounded-xl border border-ruby-200 bg-ruby-50 px-4 py-3 text-sm font-semibold text-ruby-700">{site.name} không bán rượu cho người dưới 18 tuổi và phụ nữ đang mang thai.</p>
-        </div>
-      </Container>
-    </section>
-  );
-}
-
-function StoryPoint({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border-l-4 border-gold-500 bg-white/70 p-5 shadow-card">
-      <p className="flex items-center gap-2 font-display text-lg font-semibold text-navy-900"><Sparkles className="size-4 text-gold-600" />{title}:</p>
-      <p className="mt-2">{children}</p>
-    </div>
   );
 }
