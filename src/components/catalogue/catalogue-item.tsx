@@ -17,6 +17,9 @@ import { AddToCartButton, WishlistButton } from "./product-actions";
  * hẹp hơn thì khối giá nằm trên, bảng thành phần ở dưới. Tên set giữ chỗ cố định 2 dòng (min-h-[4rem])
  * để khối giá của các ô cùng hàng luôn thẳng nhau dù tên dài hay ngắn.
  */
+/** Dải màu dọc theo mép ảnh studio (đo trên 14 ảnh, lệch tối đa 2/255). */
+const STUDIO_BG = "linear-gradient(180deg,#eee4d8 0%,#f1e9de 10%,#f3ede1 25%,#f4eee2 40%,#f4eee2 50%,#f2ece0 60%,#f2eadf 70%,#efe7da 80%,#e7decf 90%,#dfd6c7 100%)";
+
 export function CatalogueItem({ product, priority = false, brand }: { product: Product; priority?: boolean; brand?: string }) {
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -30,9 +33,11 @@ export function CatalogueItem({ product, priority = false, brand }: { product: P
     <article className="@container flex h-full flex-col rounded-3xl bg-tet-50 p-4 font-cat-sans text-ink-900 ring-1 ring-tet-200 transition-shadow duration-500 hover:shadow-card-hover sm:p-5">
       {/* Ảnh: chính + 3 phụ */}
       <div className="grid gap-3 @lg:grid-cols-[minmax(0,1fr)_minmax(0,27%)]">
-        <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-tet-100 @lg:aspect-auto @lg:h-full @lg:min-h-[18rem]">
+        {/* Khung 4:3 cố định, ảnh vuông thu vừa khung (object-contain) để thấy trọn sản phẩm.
+            Nền 2 bên là dải màu lấy từ mép ảnh studio (sáng giữa, sẫm dần xuống sàn) để không lộ đường nối. */}
+        <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl" style={{ background: STUDIO_BG }}>
           {main && (
-            <Image src={main.src} alt={main.alt || product.name} fill priority={priority} sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+            <Image src={main.src} alt={main.alt || product.name} fill priority={priority} sizes="(min-width: 1024px) 40vw, 100vw" className="object-contain transition-transform duration-700 group-hover:scale-[1.03]" />
           )}
           <button type="button" onClick={() => setLightbox(active)} className="absolute inset-0" aria-label="Phóng to ảnh" />
           <span className="pointer-events-none absolute bottom-3 right-3 grid size-9 place-items-center rounded-full bg-white/90 text-ink-900 opacity-0 shadow transition-opacity group-hover:opacity-100"><Maximize2 className="size-4" /></span>
@@ -43,8 +48,8 @@ export function CatalogueItem({ product, priority = false, brand }: { product: P
         {thumbs.length > 0 && (
           <div className="grid grid-cols-3 gap-3 @lg:grid-cols-1 @lg:grid-rows-3">
             {thumbs.map(({ im, i }) => (
-              <button key={im.thumb + i} type="button" onClick={() => setActive(i)} onDoubleClick={() => setLightbox(i)} aria-label={`Xem ảnh ${i + 1}`} className="relative aspect-[4/3] overflow-hidden rounded-xl bg-tet-100 ring-2 ring-transparent transition-all hover:ring-sun-500 @lg:aspect-auto">
-                <Image src={im.thumb} alt="" fill sizes="(min-width: 1024px) 12vw, 33vw" className="object-cover" />
+              <button key={im.thumb + i} type="button" onClick={() => setActive(i)} onDoubleClick={() => setLightbox(i)} aria-label={`Xem ảnh ${i + 1}`} style={{ background: STUDIO_BG }} className="relative aspect-[4/3] overflow-hidden rounded-xl ring-2 ring-transparent transition-all hover:ring-sun-500 @lg:aspect-auto">
+                <Image src={im.thumb} alt="" fill sizes="(min-width: 1024px) 12vw, 33vw" className="object-contain" />
               </button>
             ))}
           </div>
