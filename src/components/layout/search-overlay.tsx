@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowUpRight, Clock, Search, TrendingUp, X } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
-import type { ProductLite } from "@/lib/catalogue";
+import { searchList, type ProductLite } from "@/lib/catalogue";
 import type { Navigation } from "@/lib/cms";
 
 const RECENT_KEY = "tqgift-recent-search-v1";
@@ -44,11 +44,8 @@ function useRecentSearches() {
   );
 }
 
-function match(products: ProductLite[], q: string, limit = 8) {
-  const s = q.trim().toLowerCase();
-  if (!s) return [];
-  return products.filter((p) => p.name.toLowerCase().includes(s) || p.code.toLowerCase().includes(s)).slice(0, limit);
-}
+/** Tìm theo tên (không cần dấu), mã (TQ-01, tq1, 01) hoặc giá (500k, 1tr2, dưới 500k). */
+const match = (products: ProductLite[], q: string, limit = 8) => searchList(products, q, limit);
 
 /** Tô đậm phần khớp từ khoá trong tên sản phẩm. */
 function Highlight({ text, q }: { text: string; q: string }) {
@@ -174,7 +171,7 @@ export function SearchOverlay({ open, onClose, products, navigation }: { open: b
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Tìm sản phẩm, mã quà (VD: TQG01)"
+            placeholder="Tên, mã hoặc giá (VD: TQ-01, 500k)"
             autoComplete="off"
             enterKeyHint="search"
             className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-ink-900 placeholder:text-ink-400 focus:outline-none [&::-webkit-search-cancel-button]:hidden"

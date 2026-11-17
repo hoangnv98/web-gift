@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgePercent, FileCheck2, Heart, Printer, Truck, Handshake, Gem, ShieldCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { unsplash, img } from "@/lib/images";
+import { cn, formatPrice } from "@/lib/utils";
+// Ảnh khối Giới thiệu: ghép từ ảnh studio set thật (_build/scripts/anh_gioi_thieu.py bên thư mục TQ-Gift)
+import aboutImage from "@/assets/home/gioi-thieu-tqgift.jpg";
 import { getHomePage, getPosts, getProducts, type LogoBlock, type Product } from "@/lib/cms";
 import { byCategory, priceTiers } from "@/lib/catalogue";
 import { Container } from "@/components/ui/container";
@@ -13,7 +14,7 @@ import { ProductCard } from "@/components/catalogue/product-card";
 /* ---------------------- Section 1b – 4 Cam kết vàng --------------------- */
 export const commitments = [
   { icon: Printer, title: "Miễn phí in logo doanh nghiệp", text: "Thiệp, tem, ép kim hoặc khắc laser theo nhận diện thương hiệu." },
-  { icon: BadgePercent, title: "Chiết khấu B2B hấp dẫn", text: "Ưu đãi theo mốc 10 / 30 / 50 / 100+ phần quà." },
+  { icon: BadgePercent, title: "Chiết khấu B2B hấp dẫn", text: "Giảm 5% từ 10 set, đến 25% khi đặt từ 500 set." },
   { icon: FileCheck2, title: "Đầy đủ hoá đơn VAT & hồ sơ công bố", text: "Hoá đơn GTGT, hồ sơ công bố sản phẩm, chứng nhận xuất xứ." },
   { icon: Truck, title: "Giao hàng toàn quốc đúng hẹn", text: "63 tỉnh thành, giao tận văn phòng hoặc tới từng người nhận." },
 ];
@@ -45,7 +46,7 @@ export function AboutBlock() {
       <Container className="grid items-center gap-12 lg:grid-cols-12">
         <div className="relative lg:col-span-5">
           <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-card ring-1 ring-navy-900/5">
-            <Image src={unsplash(img.handingGift, 900, 1125)} alt="Trao gửi quà tặng T&Q GIFT" fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />
+            <Image src={aboutImage} alt="Các set quà Tết T&Q GIFT" fill placeholder="blur" sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />
           </div>
         </div>
         <div className="lg:col-span-7">
@@ -101,9 +102,12 @@ export async function Shelves() {
   const [home, products] = await Promise.all([getHomePage(), getProducts()]);
   return (
     <>
-      {home.shelves.map((s, i) => (
-        <Shelf key={s.category.slug + i} eyebrow={`Kệ ${String(i + 1).padStart(2, "0")}`} title={s.title} href={`/catalogue?nhom=${s.category.slug}`} products={byCategory(products, s.category, s.limit)} className={i % 2 === 1 ? "bg-cream-100" : undefined} />
-      ))}
+      {home.shelves.map((s, i) => {
+        // Nhãn nhỏ trên tiêu đề kệ: số mẫu và giá thấp nhất của cả nhóm (thay cho "Kệ 01", "Kệ 02")
+        const all = byCategory(products, s.category);
+        const from = all.length ? Math.min(...all.map((p) => p.price)) : 0;
+        return <Shelf key={s.category.slug + i} eyebrow={`${all.length} mẫu · giá từ ${formatPrice(from)}`} title={s.title} href={`/catalogue?nhom=${s.category.slug}`} products={s.limit ? all.slice(0, s.limit) : all} className={i % 2 === 1 ? "bg-cream-100" : undefined} />;
+      })}
     </>
   );
 }

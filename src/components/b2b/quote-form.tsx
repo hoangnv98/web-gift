@@ -43,7 +43,7 @@ export function QuoteForm({ compact = false, note }: { compact?: boolean; note?:
       </div>
       <div className="mt-5 flex flex-col gap-1.5">
         <label htmlFor="message" className="text-xs font-semibold uppercase tracking-wider text-ink-500">Yêu cầu thêm</label>
-        <textarea id="message" name="message" rows={4} defaultValue={preset ? `Set quà quan tâm: ${preset}` : undefined} placeholder="Mã set quà quan tâm (VD: TQG01), ngày cần giao, địa chỉ nhận hàng..." className="rounded-xl border border-cream-300 bg-cream-50 px-4 py-3 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-gold-400" />
+        <textarea id="message" name="message" rows={4} defaultValue={preset ? `Set quà quan tâm: ${preset}` : undefined} placeholder="Mã set quà quan tâm (VD: TQ-01), ngày cần giao, địa chỉ nhận hàng..." className="rounded-xl border border-cream-300 bg-cream-50 px-4 py-3 text-sm text-ink-900 focus:outline-none focus:ring-2 focus:ring-gold-400" />
       </div>
       {/* Honeypot chống bot – người thật không thấy */}
       <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">

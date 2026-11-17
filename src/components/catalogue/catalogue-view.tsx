@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpDown, Check, ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Category, Material, Product, Tag } from "@/lib/cms";
-import { ALL_GROUP, inCategory, priceTiers, sortOptions, type SortId } from "@/lib/catalogue";
+import { ALL_GROUP, inCategory, matchesQuery, parseQuery, priceTiers, sortOptions, type SortId } from "@/lib/catalogue";
 import { CatalogueItem } from "./catalogue-item";
 import { AgeGate } from "@/components/layout/age-gate";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,8 @@ export function CatalogueView({ products, categories, materials, tags, brand }: 
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
-  const groups = useMemo(() => [ALL_GROUP, ...categories], [categories]);
+  // Nhóm tắt "Hiện trên menu" trong Admin (VD Trung thu ngoài mùa) không hiện ở bộ lọc
+  const groups = useMemo(() => [ALL_GROUP, ...categories.filter((c) => c.showInMenu !== false)], [categories]);
 
   const f = {
     nhom: sp.get("nhom") || ALL_GROUP.slug,
@@ -51,13 +52,13 @@ export function CatalogueView({ products, categories, materials, tags, brand }: 
   const results = useMemo(() => {
     const group = groups.find((g) => g.slug === f.nhom) ?? ALL_GROUP;
     const tier = priceTiers.find((t) => t.id === f.gia);
-    const q = f.q.trim().toLowerCase();
+    const q = parseQuery(f.q);
     let list = products.filter((p) => {
       if (!inCategory(p, group)) return false;
       if (f.chatLieu && p.material.slug !== f.chatLieu) return false;
       if (f.tag && !p.tags.includes(f.tag)) return false;
       if (tier && (p.price < tier.min || (tier.max !== null && p.price >= tier.max))) return false;
-      if (q && !(p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.items.some((i) => i.toLowerCase().includes(q)))) return false;
+      if (!matchesQuery(p, q, p.items)) return false;
       return true;
     });
     if (f.sapXep === "gia-tang") list = [...list].sort((a, b) => a.price - b.price);

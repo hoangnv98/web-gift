@@ -67,7 +67,7 @@ export interface Product {
   seo?: { title?: string; description?: string; image?: ImageRef };
 }
 
-export interface Category { slug: string; label: string; occasion?: Occasion; kind?: Kind; description?: string; image?: ImageRef }
+export interface Category { slug: string; label: string; occasion?: Occasion; kind?: Kind; description?: string; image?: ImageRef; /** Tắt trong Admin -> ẩn khỏi bộ lọc catalogue */ showInMenu?: boolean }
 export interface Material { slug: string; label: string }
 export interface Tag { slug: string; label: string; ageGate: boolean }
 
@@ -200,7 +200,7 @@ function mapProduct(p: CmsProduct): Product {
   };
 }
 
-const mapCategory = (c: CmsCategory): Category => ({ slug: c.slug, label: c.title, occasion: c.occasion ?? undefined, kind: c.kind ?? undefined, description: c.description ?? undefined, image: toImage(c.image) });
+const mapCategory = (c: CmsCategory): Category => ({ slug: c.slug, label: c.title, occasion: c.occasion ?? undefined, kind: c.kind ?? undefined, description: c.description ?? undefined, image: toImage(c.image), showInMenu: c.showInMenu ?? true });
 const mapMaterial = (m: CmsMaterial): Material => ({ slug: m.slug, label: m.title });
 const mapTag = (t: CmsTag): Tag => ({ slug: t.slug, label: t.title, ageGate: Boolean(t.ageGate) });
 

@@ -26,10 +26,14 @@ export const occasionLabel = (o: Occasion) => ({ tet: "Quà Tết", "trung-thu":
 export const kindLabel = (k: Kind) => ({ hop: "Hộp quà", gio: "Giỏ quà", giftset: "Giftset" })[k];
 export const badgeLabel: Record<BadgeId, string> = { "ban-chay": "Bán chạy", "cao-cap": "Cao cấp", "gioi-han": "Giới hạn", moi: "Mới" };
 
-/** Sản phẩm thuộc nhóm khi khớp dịp và loại của nhóm (bỏ trống = mọi). */
-export function inCategory(p: Product, c: Category) {
+/**
+ * Sản phẩm thuộc nhóm khi khớp dịp và loại của nhóm (bỏ trống = mọi).
+ * Nhóm có slug kết thúc bằng "-cao-cap" (VD hop-qua-tet-cao-cap) chỉ lấy sản phẩm gắn nhãn "Cao cấp" trong Admin.
+ */
+export function inCategory(p: Pick<Product, "occasion" | "kind" | "badge">, c: Category) {
   if (c.occasion && p.occasion !== c.occasion) return false;
   if (c.kind && p.kind !== c.kind) return false;
+  if (c.slug.endsWith("-cao-cap") && p.badge !== "cao-cap") return false;
   return true;
 }
 
@@ -48,13 +52,70 @@ export const getFeatured = (products: Product[], limit = 6) => products.filter((
 export const getRelated = (products: Product[], product: Product, limit = 4) =>
   products.filter((p) => p.slug !== product.slug && p.occasion === product.occasion).slice(0, limit);
 
-export function searchProducts(products: Product[], q: string, limit = 6) {
-  const s = q.trim().toLowerCase();
-  if (!s) return [];
-  return products
-    .filter((p) => p.name.toLowerCase().includes(s) || p.code.toLowerCase().includes(s) || p.items.some((i) => i.toLowerCase().includes(s)))
-    .slice(0, limit);
+/* --------------------------- Tìm kiếm: tên, mã, giá --------------------------- */
+
+/** Bỏ dấu, chữ thường: "Hộp Quà Tết" -> "hop qua tet". Gõ có dấu hay không dấu đều tìm được. */
+export const fold = (s: string) =>
+  s.toLowerCase().replace(/đ/g, "d").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim();
+
+/**
+ * Đọc giá từ chuỗi tìm kiếm. Phải có đơn vị hoặc số đủ lớn để không lẫn với mã (gõ "49" là tìm mã TQ-49):
+ * "500k", "500 nghìn", "500.000", "500000", "1tr", "1tr5", "1,5 triệu", "1.2tr". Trả về số đồng hoặc null.
+ */
+export function parsePrice(raw: string): number | null {
+  const s = fold(raw).replace(/\s+/g, "");
+  let m = s.match(/^(\d+)(?:[.,](\d+))?(tr|trieu|cu)(\d)?$/); // 1tr, 1,5tr, 1tr5
+  if (m) return Math.round((Number(`${m[1]}.${m[2] ?? m[4] ?? 0}`)) * 1_000_000);
+  m = s.match(/^(\d+(?:[.,]\d+)?)(k|nghin|ngan)$/); // 500k, 1.2k
+  if (m) return Math.round(Number(m[1].replace(",", ".")) * 1_000);
+  m = s.match(/^(\d{1,3}(?:[.,]\d{3})+|\d{4,})(d|dong|vnd)?$/); // 500.000, 500000, 500000d
+  if (m) return Number(m[1].replace(/[.,]/g, ""));
+  if (/^\d{3}$/.test(s)) return Number(s) * 1_000; // "500" -> 500.000đ (mã chỉ có 2 chữ số)
+  return null;
 }
+
+export interface SearchQuery { text: string; price: { min: number; max: number; target?: number } | null }
+
+/** "dưới 500k" -> giá < 500k; "trên 1tr" -> giá > 1tr; "500k" -> quanh 500k (±15%, tối thiểu ±50.000đ). */
+export function parseQuery(q: string): SearchQuery {
+  const text = fold(q);
+  const range = text.match(/^(duoi|tren|tu|<|>)\s*(.+)$/);
+  if (range) {
+    const v = parsePrice(range[2]);
+    if (v) return { text, price: range[1] === "duoi" || range[1] === "<" ? { min: 0, max: v } : { min: v, max: Infinity } };
+  }
+  const v = parsePrice(text);
+  if (v) {
+    const d = Math.max(50_000, v * 0.15);
+    return { text, price: { min: v - d, max: v + d, target: v } };
+  }
+  return { text, price: null };
+}
+
+const codeKey = (s: string) => fold(s).replace(/[^a-z0-9]/g, "").replace(/([a-z])0+(\d)/, "$1$2"); // "TQ-01" -> "tq1"
+
+/** Một sản phẩm có khớp chuỗi tìm kiếm không: theo giá (nếu gõ giá), theo mã, hoặc theo tên (đủ mọi từ, không cần dấu). */
+export function matchesQuery(p: { name: string; code: string; price: number }, q: SearchQuery, extra: string[] = []) {
+  if (!q.text) return true;
+  if (q.price) return p.price >= q.price.min && p.price <= q.price.max;
+  const key = codeKey(q.text);
+  if (/^\d+$/.test(key)) return Number(codeKey(p.code).replace(/^[a-z]+/, "")) === Number(key); // "49", "01" -> TQ-49, TQ-01
+  if (key && codeKey(p.code) === key) return true;
+  const hay = fold([p.name, p.code, ...extra].join(" "));
+  return q.text.split(" ").every((w) => hay.includes(w));
+}
+
+/** Lọc + sắp xếp kết quả: tìm theo giá thì giá gần nhất lên đầu. */
+export function searchList<T extends { name: string; code: string; price: number }>(products: T[], raw: string, limit?: number, extra?: (p: T) => string[]) {
+  const q = parseQuery(raw);
+  if (!q.text) return [];
+  let list = products.filter((p) => matchesQuery(p, q, extra?.(p)));
+  const target = q.price?.target;
+  if (target !== undefined) list = [...list].sort((a, b) => Math.abs(a.price - target) - Math.abs(b.price - target));
+  return limit ? list.slice(0, limit) : list;
+}
+
+export const searchProducts = (products: Product[], q: string, limit = 6) => searchList(products, q, limit, (p) => p.items);
 
 /** Thông tin sản phẩm tối giản gửi xuống client (header, giỏ hàng). */
 export interface ProductLite { slug: string; code: string; name: string; price: number; thumb: string }

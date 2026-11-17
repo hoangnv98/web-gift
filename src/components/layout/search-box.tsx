@@ -6,13 +6,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
-import type { ProductLite } from "@/lib/catalogue";
+import { searchList, type ProductLite } from "@/lib/catalogue";
 
-function search(products: ProductLite[], q: string, limit = 6) {
-  const s = q.trim().toLowerCase();
-  if (!s) return [];
-  return products.filter((p) => p.name.toLowerCase().includes(s) || p.code.toLowerCase().includes(s)).slice(0, limit);
-}
+/** Tìm theo tên (không cần dấu), mã (TQ-01, tq1, 01) hoặc giá (500k, 1tr2, dưới 500k). */
+const search = (products: ProductLite[], q: string, limit = 6) => searchList(products, q, limit);
 
 export function SearchBox({ products, className, onNavigate }: { products: ProductLite[]; className?: string; onNavigate?: () => void }) {
   const [q, setQ] = useState("");
@@ -39,7 +36,7 @@ export function SearchBox({ products, className, onNavigate }: { products: Produ
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           onBlur={() => { blurTimer.current = window.setTimeout(() => setOpen(false), 150); }}
-          placeholder="Tìm kiếm sản phẩm, mã quà (VD: TQG01)..."
+          placeholder="Tìm theo tên, mã hoặc giá (VD: TQ-01, 500k)..."
           autoComplete="off"
           className="h-full flex-1 bg-transparent px-5 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
           aria-label="Tìm kiếm sản phẩm"
